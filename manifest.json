@@ -1,7 +1,7 @@
 {
   "name": "CastSinema",
   "id": "castsinema",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "scrapers": [
     {
       "id": "castsinema-boxfilm",
@@ -502,6 +502,31 @@
       ],
       "formats": [
         "m3u8"
+      ],
+      "limited": false,
+      "disabledPlatforms": [],
+      "supportsExternalPlayer": true
+    },
+    {
+      "id": "castsinema-dizifilmizle",
+      "name": "CastSinema • DiziFilmizle",
+      "description": "DiziFilmizle Türkçe film ve dizi kazıyıcısı.",
+      "version": "1.0.0",
+      "author": "CastSinema",
+      "supportedTypes": [
+        "movie",
+        "tv"
+      ],
+      "filename": "providers/castsinema-dizifilmizle.js",
+      "enabled": true,
+      "hasSettings": false,
+      "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",
+      "contentLanguage": [
+        "tr"
+      ],
+      "formats": [
+        "m3u8",
+        "mp4"
       ],
       "limited": false,
       "disabledPlatforms": [],

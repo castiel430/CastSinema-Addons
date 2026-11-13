@@ -59,4 +59,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/tr/).
 - Manifest version bump to 1.1.0
 
 
+## [1.2.0] - 2026-11-13
+
+### Added
+- **DiziFilmizle** provider (`dizifilmizle.to`) — Türkçe film ve dizi kaynağı (TMDB arama + Vidmixi çözümleme), 22 provider.
+- DiziFilmizle için birim testi eklendi (19/19 geçiyor).
+
 ## Unreleased

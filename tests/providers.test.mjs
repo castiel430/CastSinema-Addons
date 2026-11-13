@@ -334,3 +334,33 @@ test('FullHDFilmizlesene provider refuses TV entries', async () => {
   assert.deepEqual(Array.from(streams), []);
 });
 
+test('DiziFilmizle provider searches and extracts Vidmixi stream for movie', async () => {
+  const password = 'secret-hash';
+  const salt = crypto.randomBytes(8);
+  const passBytes = Buffer.from(password, 'utf8');
+  let d = Buffer.alloc(0);
+  let di = Buffer.alloc(0);
+  while (d.length < 48) {
+    di = crypto.createHash('md5').update(Buffer.concat([di, passBytes, salt])).digest();
+    d = Buffer.concat([d, di]);
+  }
+  const cipher = crypto.createCipheriv('aes-256-cbc', d.subarray(0, 32), d.subarray(32, 48));
+  const encrypted = Buffer.concat([
+    cipher.update(JSON.stringify({ video_location: 'https://cdn.example/dizifilmizle.m3u8', title: 'Fight Club' }), 'utf8'),
+    cipher.final()
+  ]);
+  const setJson = JSON.stringify({ ct: encrypted.toString('base64'), s: salt.toString('hex') });
+
+  const provider = await loadProvider('providers/castsinema-dizifilmizle.js', async (url) => {
+    const u = String(url);
+    if (u.includes('/movie/550')) return response({ json: { title: 'Fight Club', original_title: 'Fight Club', release_date: '1999-10-15' } });
+    if (u.startsWith('https://dizifilmizle.to/api/search?q=')) return response({ json: { success: true, results: [{ id: 'x1', title: 'Dövüş Kulübü', original_title: 'Fight Club', slug: 'dovus-kulubu-filmi-hd-izle', content_type: 'movie', year: 1999 }] } });
+    if (u === 'https://dizifilmizle.to/film/dovus-kulubu-filmi-hd-izle') return response({ text: '<html><body>player https://vidmixi.com/embed/abc123 here</body></html>' });
+    if (u === 'https://vidmixi.com/embed/abc123') return response({ text: `<script>bePlayer('${password}', '${setJson.replace(/\\/g, '\\\\')}');</script>` });
+    return response({ ok: false });
+  });
+  const streams = await provider.getStreams(550, 'movie', null, null);
+  assert.equal(streams.length, 1);
+  assert.equal(streams[0].url, 'https://cdn.example/dizifilmizle.m3u8');
+  assert.equal(streams[0].provider, 'castsinema-dizifilmizle');
+});

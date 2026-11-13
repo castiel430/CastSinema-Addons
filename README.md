@@ -59,8 +59,9 @@ yayınlayamazsınız.
 | **Toon** | `toon.api` | dizi | ✅ çalışıyor |
 | **JetFilmizle** | `jetfilmizle.api` | film | ✅ çalışıyor |
 | **CimX** | `cimx.api` | film + dizi | ✅ çalışıyor |
+| **DiziFilmizle** | `dizifilmizle.to` | film + dizi | ✅ çalışıyor |
 
-21 provider. Durumlar `tools/domain_watch.py` tarafından canlı olarak
+22 provider. Durumlar `tools/domain_watch.py` tarafından canlı olarak
 doğrulanır (aşağıya bakın).
 
 > **Durum tablosu zamanla eskir.** Güncel tabloyu
@@ -168,8 +169,8 @@ her 6 saatte bir otomatik çalışacak şekilde tanımlıdır:
 
 ```text
 CastSinema/
-├── manifest.json           # 21 scraper tanımı
-├── providers/              # 21 provider JS dosyası
+├── manifest.json           # 22 scraper tanımı
+├── providers/              # 22 provider JS dosyası
 ├── assets/logo.png         # picker logosu
 ├── scripts/
 │   ├── validate.mjs        # manifest + provider doğrulaması
@@ -181,7 +182,7 @@ CastSinema/
 │   ├── run_provider.mjs    # provider'ı canlı siteye karşı çalıştıran koşum
 │   ├── providers.json      # provider başına test vakası ve host listesi
 │   └── requirements.txt
-├── tests/providers.test.mjs   # 18 birim testi
+├── tests/providers.test.mjs   # 19 birim testi
 └── docs/
     ├── ARCHITECTURE.md
     ├── BRANDING.md
@@ -194,7 +195,7 @@ CastSinema/
 
 | Komut | Ne yapar |
 |---|---|
-| `npm test` | Doğrulama + 18 birim test |
+| `npm test` | Doğrulama + 19 birim test |
 | `npm run validate` | Yalnızca statik kontroller |
 | `npm run set-repo -- <user> <repo>` | Kurulum adreslerini günceller |
 | `npm run github:setup -- [repo]` | Repo oluşturur, push eder, yayını doğrular |
@@ -229,7 +230,7 @@ CastSinema / Stremio. Each provider reads a site's HTML or API and fulfils the
 `getStreams(tmdbId, mediaType, season, episode)` contract.
 
 ```bash
-npm test                                        # validate + 18 unit tests
+npm test                                        # validate + 19 unit tests
 node scripts/set-repo.mjs <user> <repo>         # set your GitHub coordinates
 python tools/domain_watch.py                    # scan domains and test live
 ```
@@ -269,3 +270,4 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the provider contract,
 | **Toon** | `toon.api` | series |
 | **JetFilmizle** | `jetfilmizle.api` | movie |
 | **CimX** | `cimx.api` | movie + series |
+| **DiziFilmizle** | `dizifilmizle.to` | movie + series |

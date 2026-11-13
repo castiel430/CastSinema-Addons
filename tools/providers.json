@@ -172,5 +172,17 @@
       "season": 1,
       "episode": 1
     }
+  },
+  "castsinema-dizifilmizle": {
+    "file": "providers/castsinema-dizifilmizle.js",
+    "hostVar": "HOST",
+    "hostStyle": "single",
+    "base": "dizifilmizle",
+    "www": false,
+    "marker": "DiziFilmizle",
+    "test": {
+      "tmdbId": "550",
+      "type": "movie"
+    }
   }
 }
