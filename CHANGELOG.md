@@ -65,4 +65,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/tr/).
 - **DiziFilmizle** provider (`dizifilmizle.to`) — Türkçe film ve dizi kaynağı (TMDB arama + Vidmixi çözümleme), 22 provider.
 - DiziFilmizle için birim testi eklendi (19/19 geçiyor).
 
+## [1.3.0] - 2026-11-13
+
+### Removed
+- Çalışmayan/kullanılamayan provider'lar kaldırıldı: Vidup, Hexa, Vidmody, HDFilmDelisi, JetFilmizle, CimX, Anime, Kartun, Toon (sahte `.api` host'lar, erişilemeyen/ölü uç noktalar). Manifest ve repo yalnızca çalıştırılabilir Türkçe içerik sağlayıcılarıyla sadeleştirildi.
+
 ## Unreleased

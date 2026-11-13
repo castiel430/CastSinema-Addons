@@ -40,8 +40,6 @@ yayınlayamazsınız.
 |---|---|---|---|
 | **DiziBox** | `www.dizibox.live` | dizi | ✅ çalışıyor |
 | **ClipBox** | `vixsrc.to` | film + dizi | ✅ çalışıyor |
-| **Vidup** | `vidup.to` | film + dizi | ✅ çalışıyor |
-| **Hexa** | `theemoviedb.hexa.su` | film + dizi | ✅ çalışıyor |
 | **Xpass** | `play.xpass.top` | film + dizi | ✅ çalışıyor |
 | **FilmModu** | `filmmodu.cc` | film | ✅ çalışıyor |
 | **DiziMom** | `ddizimom.net` | dizi | ✅ çalışıyor |
@@ -52,16 +50,9 @@ yayınlayamazsınız.
 | **HDFilmCehenni** | `www.hdfilmcehenni.nl` | film | ✅ çalışıyor |
 | **Webteizle** | `webteizle.info` | film | ✅ çalışıyor |
 | **Sezonluk Dizi** | `sezonlukdizi.cc` | dizi | ✅ çalışıyor |
-| **Vidmody** | `vidmody.com` | film | ✅ çalışıyor |
-| **HDFilmDelisi** | `hdfilmdelisi.org` | film | ✅ çalışıyor |
-| **Kartun** | `kartun.api` | dizi | ✅ çalışıyor |
-| **Anime** | `anime.api` | dizi | ✅ çalışıyor |
-| **Toon** | `toon.api` | dizi | ✅ çalışıyor |
-| **JetFilmizle** | `jetfilmizle.api` | film | ✅ çalışıyor |
-| **CimX** | `cimx.api` | film + dizi | ✅ çalışıyor |
 | **DiziFilmizle** | `dizifilmizle.to` | film + dizi | ✅ çalışıyor |
 
-22 provider. Durumlar `tools/domain_watch.py` tarafından canlı olarak
+13 provider. Durumlar `tools/domain_watch.py` tarafından canlı olarak
 doğrulanır (aşağıya bakın).
 
 > **Durum tablosu zamanla eskir.** Güncel tabloyu
@@ -74,7 +65,6 @@ doğrulanır (aşağıya bakın).
 |---|---|
 | **DiziBox** | Dizin listesi + Türkçe-duyarlı fuzzy sıralama kullanır. Oynatıcı zinciri `king.php → molystream → moly.php → haydi.php → ok.ru` şeklindedir ve her halka **Referer** başlığı ister. |
 | **FilmModu** | Laravel uygulaması: arama `/arama/onemi`, kaynaklar `/px`; ikisi de CSRF + oturum çerezi istiyor. Provider küçük bir cookie jar tutar. |
-| **Hexa** | API bir captcha handshake kullanır: challenge → çözüm servisi → redeem → kısa ömürlü cap token. |
 | **FilmMakinesi** | Arama `/arama/?s=` üzerinden ve **IMDb id** ile çalışır; bölüm oynatıcısı `closeload.filmmakinesi.to` altındadır. Telif nedeniyle kaldırılmış bölümlerde sadece YouTube fragmanı kalır — provider bunu **stream olarak döndürmez**. |
 | **HDFilmCehenni** | Arama `/search?q=` üzerinden JSON döner. Film sayfaları oynatıcıyı sunucu tarafında verir; **bölüm sayfaları oynatıcıyı boş render ediyor**, bu yüzden dizi sunulmuyor. |
 | **FullHDFilmizlesene** | Yalnızca film. Kaynak adresleri sayfadaki `scx` nesnesinde ROT13 + base64 ile gizlenir; provider bunları çözer. |
@@ -169,8 +159,8 @@ her 6 saatte bir otomatik çalışacak şekilde tanımlıdır:
 
 ```text
 CastSinema/
-├── manifest.json           # 22 scraper tanımı
-├── providers/              # 22 provider JS dosyası
+├── manifest.json           # 13 scraper tanımı
+├── providers/              # 13 provider JS dosyası
 ├── assets/logo.png         # picker logosu
 ├── scripts/
 │   ├── validate.mjs        # manifest + provider doğrulaması
@@ -182,7 +172,7 @@ CastSinema/
 │   ├── run_provider.mjs    # provider'ı canlı siteye karşı çalıştıran koşum
 │   ├── providers.json      # provider başına test vakası ve host listesi
 │   └── requirements.txt
-├── tests/providers.test.mjs   # 19 birim testi
+├── tests/providers.test.mjs   # 16 birim testi
 └── docs/
     ├── ARCHITECTURE.md
     ├── BRANDING.md
@@ -195,7 +185,7 @@ CastSinema/
 
 | Komut | Ne yapar |
 |---|---|
-| `npm test` | Doğrulama + 19 birim test |
+| `npm test` | Doğrulama + 16 birim test |
 | `npm run validate` | Yalnızca statik kontroller |
 | `npm run set-repo -- <user> <repo>` | Kurulum adreslerini günceller |
 | `npm run github:setup -- [repo]` | Repo oluşturur, push eder, yayını doğrular |
@@ -204,12 +194,6 @@ CastSinema/
 ---
 
 ## Uyarılar
-
-### Üçüncü taraf servisler
-
-`Vidup` ve `Hexa` provider'ları `https://enc-dec.app` adlı **üçüncü
-taraf** çözümleme servisine bağlıdır. Servis çökerse bu iki provider birlikte
-çalışmaz. Servisin kullanım şartlarını inceleyin.
 
 ### Gömülü TMDB anahtarı
 
@@ -230,7 +214,7 @@ CastSinema / Stremio. Each provider reads a site's HTML or API and fulfils the
 `getStreams(tmdbId, mediaType, season, episode)` contract.
 
 ```bash
-npm test                                        # validate + 19 unit tests
+npm test                                        # validate + 16 unit tests
 node scripts/set-repo.mjs <user> <repo>         # set your GitHub coordinates
 python tools/domain_watch.py                    # scan domains and test live
 ```
@@ -251,8 +235,6 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the provider contract,
 |---|---|---|
 | **DiziBox** | `www.dizibox.live` | series |
 | **ClipBox** | `vixsrc.to` | movie + series |
-| **Vidup** | `vidup.to` | movie + series |
-| **Hexa** | `theemoviedb.hexa.su` | movie + series |
 | **Xpass** | `play.xpass.top` | movie + series |
 | **FilmModu** | `filmmodu.cc` | movie |
 | **DiziMom** | `ddizimom.net` | series |
@@ -263,11 +245,4 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the provider contract,
 | **HDFilmCehenni** | `www.hdfilmcehenni.nl` | movie |
 | **Webteizle** | `webteizle.info` | movie |
 | **Sezonluk Dizi** | `sezonlukdizi.cc` | series |
-| **Vidmody** | `vidmody.com` | movie |
-| **HDFilmDelisi** | `hdfilmdelisi.org` | movie |
-| **Kartun** | `kartun.api` | series |
-| **Anime** | `anime.api` | series |
-| **Toon** | `toon.api` | series |
-| **JetFilmizle** | `jetfilmizle.api` | movie |
-| **CimX** | `cimx.api` | movie + series |
 | **DiziFilmizle** | `dizifilmizle.to` | movie + series |

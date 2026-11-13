@@ -37,30 +37,6 @@
       "type": "movie"
     }
   },
-  "castsinema-vidup": {
-    "file": "providers/castsinema-vidup.js",
-    "hostVar": "VIDUP",
-    "hostStyle": "single",
-    "base": "vidup",
-    "www": false,
-    "marker": "vidup",
-    "test": {
-      "tmdbId": "550",
-      "type": "movie"
-    }
-  },
-  "castsinema-hexa": {
-    "file": "providers/castsinema-hexa.js",
-    "hostVar": "HEXA_API",
-    "hostStyle": "single",
-    "base": "theemoviedb.hexa",
-    "www": false,
-    "marker": "hexa",
-    "test": {
-      "tmdbId": "550",
-      "type": "movie"
-    }
-  },
   "castsinema-xpass": {
     "file": "providers/castsinema-xpass.js",
     "hostVar": "XPASS",
