@@ -5,7 +5,7 @@
  */
 "use strict";
 
-var HOSTS = ["https://hdfilmcehennemi.la", "https://www.hdfilmcehennemi.la", "https://www.hdfilmcehennemi.nl", "https://hdfilmcehennemi.com", "https://www.hdfilmcehennemi.com"];
+var HOSTS = ["https://www.hdfilmcehennemi.nl", "https://hdfilmcehennemi.nl", "https://www.hdfilmcehennemi.la", "https://hdfilmcehennemi.la", "https://hdfilmcehennemi.com", "https://www.hdfilmcehennemi.com"];
 var TMDB_API = "https://api.themoviedb.org/3";
 var TMDB_KEY = "4e44d9029b1270a757cddc766a1bcb63";
 var UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36";
