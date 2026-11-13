@@ -89,8 +89,8 @@
   },
   "castsinema-filmmakinesi": {
     "file": "providers/castsinema-filmmakinesi.js",
-    "hostVar": "HOSTS",
-    "hostStyle": "list",
+    "hostVar": "HOST",
+    "hostStyle": "single",
     "base": "filmmakinesi",
     "www": false,
     "marker": "FilmMakinesi",

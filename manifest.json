@@ -1,7 +1,7 @@
 {
   "name": "CastSinema",
   "id": "castsinema",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "scrapers": [
     {
       "id": "castsinema-boxfilm",
@@ -178,23 +178,21 @@
     {
       "id": "castsinema-filmmakinesi",
       "name": "CastSinema • FilmMakinesi",
-      "description": "FilmMakinesi yerel HTML/JS film ve dizi kazıyıcısı.",
-      "version": "1.0.0",
+      "description": "FilmMakinesi canli arama ucu ve oynatici API uzerinden HLS akisi cozen film kaziyicisi.",
+      "version": "1.1.0",
       "author": "CastSinema",
       "supportedTypes": [
-        "movie",
-        "tv"
+        "movie"
       ],
       "filename": "providers/castsinema-filmmakinesi.js",
       "enabled": true,
       "hasSettings": false,
       "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",
       "contentLanguage": [
-        "tr",
-        "en"
+        "tr"
       ],
       "formats": [
-        "video"
+        "m3u8"
       ],
       "limited": false,
       "disabledPlatforms": [],
@@ -203,11 +201,12 @@
     {
       "id": "castsinema-hdfilmcehennemi",
       "name": "CastSinema • HDFilmCehennemi",
-      "description": "HDFilmCehennemi yerel HTML/JS film kazıyıcısı.",
-      "version": "1.0.0",
+      "description": "HDFilmCehennemi JSON arama ucu ve sifreli oynatici uzerinden HLS akisi cozen film/dizi kaziyicisi.",
+      "version": "1.1.0",
       "author": "CastSinema",
       "supportedTypes": [
-        "movie"
+        "movie",
+        "tv"
       ],
       "filename": "providers/castsinema-hdfilmcehennemi.js",
       "enabled": true,
@@ -218,7 +217,7 @@
         "en"
       ],
       "formats": [
-        "video"
+        "m3u8"
       ],
       "limited": false,
       "disabledPlatforms": [],
@@ -227,8 +226,8 @@
     {
       "id": "castsinema-fullhdfilmizlesene",
       "name": "CastSinema • FullHDFilmizlesene",
-      "description": "FullHDFilmizlesene yerel HTML/JS Türkçe dublaj film kazıyıcısı.",
-      "version": "1.0.0",
+      "description": "FullHDFilmizlesene scx kaynaklari ve oynaticidan HLS akisi cozen Turkce dublaj film kaziyicisi.",
+      "version": "1.1.0",
       "author": "CastSinema",
       "supportedTypes": [
         "movie"
@@ -241,7 +240,7 @@
         "tr"
       ],
       "formats": [
-        "video"
+        "m3u8"
       ],
       "limited": false,
       "disabledPlatforms": [],

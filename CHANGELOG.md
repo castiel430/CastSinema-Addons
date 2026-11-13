@@ -5,6 +5,29 @@ All notable changes to CastSinema-Addons will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/tr/).
 
+## [1.5.0] - 2026-11-13
+
+### Fixed
+- **FullHDFilmizlesene, FilmMakinesi, HDFilmCehennemi** artık oynatılamayan embed
+  sayfası yerine **gerçek HLS master (m3u8)** döndürüyor. Android TV'deki
+  `unrecognized file format` / `ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED`
+  hatalarının kaynağı buydu.
+  - **HDFilmCehennemi**: `/search/?q=` JSON ucu (IMDb id ile), dizi sayfasından
+    bölüm linki, `hdfilmcehennemi.mobi` oynatıcısı (yalnızca oynatıcı
+    istemcilerine yanıt verir) ve şifreli manifest için saf JS çözücü.
+  - **FilmMakinesi**: temanın canlı arama ucu (`/?knl_ajax_search=1&s=`),
+    `oynatloload.top` oynatıcısı ve `/api/video-bilgi/<id>` API'si.
+  - **FullHDFilmizlesene**: `scx` kaynaklarının çözülmesi + `rapidvid`
+    oynatıcısındaki manifestin çözülmesi.
+- Altyazılar (Türkçe/İngilizce `.vtt`) akışlara eklendi.
+- `netFetch` başlık birleştirmesinde anahtar karşılaştırması büyük/küçük harf
+  duyarsız hale getirildi; `X-Requested-With` gibi başlıklar artık korunuyor.
+- Cloudflare 403/429 için istemci profil rotasyonu sırası siteye göre düzenlendi.
+
+### Changed
+- Manifest sürümü `1.5.0`; üç provider `1.1.0` sürümüne ve `m3u8` formatına
+  geçirildi (HDFilmCehennemi artık dizi desteği sunuyor).
+
 ## [1.0.0] - 2026-11-13
 
 ### Added

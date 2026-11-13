@@ -45,9 +45,9 @@ yayınlayamazsınız.
 | **DiziMom** | `ddizimom.net` | dizi | ✅ çalışıyor |
 | **SetFilmIzle** | `www.setfilmizle.ltd` | film + dizi | ✅ çalışıyor |
 | **BoxFilm** | `boxfilm.net` | film | ✅ çalışıyor (~120 film) |
-| **FullHDFilmizlesene** | `www.fullhdfilmizlesene.now` | film | ✅ çalışıyor |
-| **FilmMakinesi** | `filmmakinesi.to` | film + dizi | ✅ çalışıyor |
-| **HDFilmCehenni** | `www.hdfilmcehenni.nl` | film | ✅ çalışıyor |
+| **FullHDFilmizlesene** | `www.fullhdfilmizlesene.now` | film | ✅ çalışıyor (HLS + altyazı) |
+| **FilmMakinesi** | `filmmakinesi.co` | film | ✅ çalışıyor (küçük katalog) |
+| **HDFilmCehennemi** | `www.hdfilmcehennemi.nl` | film + dizi | ✅ çalışıyor (HLS + altyazı) |
 | **Webteizle** | `webteizle.info` | film | ✅ çalışıyor |
 | **Sezonluk Dizi** | `sezonlukdizi.cc` | dizi | ✅ çalışıyor |
 | **DiziFilmizle** | `dizifilmizle.to` | film + dizi | ✅ çalışıyor |
@@ -65,9 +65,9 @@ doğrulanır (aşağıya bakın).
 |---|---|
 | **DiziBox** | Dizin listesi + Türkçe-duyarlı fuzzy sıralama kullanır. Oynatıcı zinciri `king.php → molystream → moly.php → haydi.php → ok.ru` şeklindedir ve her halka **Referer** başlığı ister. |
 | **FilmModu** | Laravel uygulaması: arama `/arama/onemi`, kaynaklar `/px`; ikisi de CSRF + oturum çerezi istiyor. Provider küçük bir cookie jar tutar. |
-| **FilmMakinesi** | Arama `/arama/?s=` üzerinden ve **IMDb id** ile çalışır; bölüm oynatıcısı `closeload.filmmakinesi.to` altındadır. Telif nedeniyle kaldırılmış bölümlerde sadece YouTube fragmanı kalır — provider bunu **stream olarak döndürmez**. |
-| **HDFilmCehenni** | Arama `/search?q=` üzerinden JSON döner. Film sayfaları oynatıcıyı sunucu tarafında verir; **bölüm sayfaları oynatıcıyı boş render ediyor**, bu yüzden dizi sunulmuyor. |
-| **FullHDFilmizlesene** | Yalnızca film. Kaynak adresleri sayfadaki `scx` nesnesinde ROT13 + base64 ile gizlenir; provider bunları çözer. |
+| **FilmMakinesi** | Canlı arama ucu `/?knl_ajax_search=1&s=` üzerinden çalışır (tema JS'inin kullandığı uç). Film sayfasındaki `oynatloload.top` oynatıcısı, sayfadaki `__ULTRA_EAUTH` jetonu ile `/api/video-bilgi/<id>` ucundan **HLS master + Türkçe .vtt** döndürür. Sitenin kataloğu küçük olduğu için sitede yayınlanmayan bir başlık için sonuç çıkmaz. |
+| **HDFilmCehennemi** | Arama `/search/?q=` üzerinden JSON döner (`X-Requested-With: fetch` zorunlu). Oynatıcı `hdfilmcehennemi.mobi` yalnızca **oynatıcı istemcilerine** (okhttp/ExoPlayer) yanıt verir; manifest şifreli olarak gelir ve saf JS ile çözülür. Dizi sayfasından bölüm linki bulunur, bölüm sayfasındaki oynatıcıdan HLS + altyazı çıkarılır. |
+| **FullHDFilmizlesene** | Yalnızca film. Kaynak adresleri sayfadaki `scx` nesnesinde ROT13 + base64 (veya `v2.` varyantı) ile gizlenir; provider bunları çözer, ardından `rapidvid` oynatıcısındaki şifreli manifestten HLS master + altyazı elde eder. |
 | **BoxFilm** | JSON arama API'si sunucu tarafında **Türkçe** başlıklarla eşleşiyor; küçük bir katalog (~120 film) var ve doğrudan m3u8 veriyor. |
 | **Webteizle** | Arama formu `?q=` üzerinden çalışır; IMDb id'leri poster URL'lerinde bulunur. Player code base64-reversed ile çözülür. |
 | **Sezonluk Dizi** | Arama `/ara?q=` üzerinden JSON döner; bölüm sayfaları player code ile çalışır. |
@@ -159,8 +159,8 @@ her 6 saatte bir otomatik çalışacak şekilde tanımlıdır:
 
 ```text
 CastSinema/
-├── manifest.json           # 13 scraper tanımı
-├── providers/              # 13 provider JS dosyası
+├── manifest.json           # 14 scraper tanımı
+├── providers/              # 14 provider JS dosyası
 ├── assets/logo.png         # picker logosu
 ├── scripts/
 │   ├── validate.mjs        # manifest + provider doğrulaması
@@ -241,8 +241,8 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the provider contract,
 | **SetFilmIzle** | `www.setfilmizle.ltd` | movie + series |
 | **BoxFilm** | `boxfilm.net` | movie (~120) |
 | **FullHDFilmizlesene** | `www.fullhdfilmizlesene.now` | movie |
-| **FilmMakinesi** | `filmmakinesi.to` | movie + series |
-| **HDFilmCehenni** | `www.hdfilmcehenni.nl` | movie |
+| **FilmMakinesi** | `filmmakinesi.co` | movie (küçük katalog) |
+| **HDFilmCehennemi** | `www.hdfilmcehennemi.nl` | movie + series |
 | **Webteizle** | `webteizle.info` | movie |
 | **Sezonluk Dizi** | `sezonlukdizi.cc` | series |
 | **DiziFilmizle** | `dizifilmizle.to` | movie + series |
