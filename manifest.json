@@ -1,7 +1,7 @@
 {
   "name": "CastSinema",
   "id": "castsinema",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "scrapers": [
     {
       "id": "castsinema-boxfilm",
@@ -313,6 +313,30 @@
       "formats": [
         "m3u8",
         "mp4"
+      ],
+      "limited": false,
+      "disabledPlatforms": [],
+      "supportsExternalPlayer": true
+    },
+    {
+      "id": "castsinema-dizilla",
+      "name": "CastSinema • Dizilla",
+      "description": "Dizilla Türkçe film ve dizi kazıyıcısı (pichive/NP_CONFIG).",
+      "version": "1.0.0",
+      "author": "CastSinema",
+      "supportedTypes": [
+        "movie",
+        "tv"
+      ],
+      "filename": "providers/castsinema-dizilla.js",
+      "enabled": true,
+      "hasSettings": false,
+      "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",
+      "contentLanguage": [
+        "tr"
+      ],
+      "formats": [
+        "m3u8"
       ],
       "limited": false,
       "disabledPlatforms": [],

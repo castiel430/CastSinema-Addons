@@ -20,7 +20,18 @@ function profileHeaders(ua) {
   return { "User-Agent": ua, "Accept-Language": "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7" };
 }
 function requestProfiles() {
-  return [profileHeaders(UA_CHROME), profileHeaders(UA_FIREFOX), profileHeaders(UA_EDGE), profileHeaders(UA_SAFARI), {}];
+  return [
+    profileHeaders("Dalvik/2.1.0 (Linux; U; Android 13; SM-G998B Build/TP1A.220624.014)"),
+    profileHeaders("okhttp/4.9.2"),
+    profileHeaders("ExoPlayerLib/2.19.1"),
+    profileHeaders("stagefright/1.2 (Linux;Android 11)"),
+    profileHeaders("VLC/3.0.21 LibVLC/3.0.21"),
+    profileHeaders(UA_CHROME),
+    profileHeaders(UA_FIREFOX),
+    profileHeaders(UA_EDGE),
+    profileHeaders(UA_SAFARI),
+    {}
+  ];
 }
 var KEEP_HEADERS = ["accept", "referer", "origin", "range", "if-none-match", "if-modified-since", "cookie", "content-type", "x-requested-with"];
 function mergeHeaders(base, profile) {

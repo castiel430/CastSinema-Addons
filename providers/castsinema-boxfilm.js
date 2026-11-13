@@ -27,6 +27,11 @@ var KEEP_HEADERS = ["Referer", "Origin", "Cookie", "X-Requested-With", "X-CSRF-T
 
 function requestProfiles() {
   return [
+    { "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 13; SM-G998B Build/TP1A.220624.014)", "Accept": "*/*" },
+    { "User-Agent": "okhttp/4.9.2", "Accept": "*/*" },
+    { "User-Agent": "ExoPlayerLib/2.19.1", "Accept": "*/*" },
+    { "User-Agent": "stagefright/1.2 (Linux;Android 11)", "Accept": "*/*" },
+    { "User-Agent": "VLC/3.0.21 LibVLC/3.0.21", "Accept": "*/*" },
     { "User-Agent": UA_CHROME, "Accept": ACCEPT_HTML, "Accept-Language": ACCEPT_LANG, "Upgrade-Insecure-Requests": "1", "Sec-Fetch-Dest": "document", "Sec-Fetch-Mode": "navigate", "Sec-Fetch-Site": "none", "Sec-Fetch-User": "?1" },
     { "User-Agent": UA_FIREFOX, "Accept": ACCEPT_HTML, "Accept-Language": ACCEPT_LANG, "Upgrade-Insecure-Requests": "1" },
     { "User-Agent": UA_EDGE, "Accept": ACCEPT_HTML, "Accept-Language": ACCEPT_LANG, "Upgrade-Insecure-Requests": "1", "Sec-Ch-Ua": "\"Chromium\";v=\"139\", \"Not;A=Brand\";v=\"24\"", "Sec-Ch-Ua-Mobile": "?0", "Sec-Ch-Ua-Platform": "\"Windows\"" },

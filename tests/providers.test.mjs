@@ -309,3 +309,22 @@ test('DiziFilmizle provider searches and extracts Vidmixi stream for movie', asy
   assert.equal(streams[0].url, 'https://cdn.example/dizifilmizle.m3u8');
   assert.equal(streams[0].provider, 'castsinema-dizifilmizle');
 });
+
+test('Dizilla provider finds episode via slug/search and extracts pichive master stream', async () => {
+  const provider = await loadProvider('providers/castsinema-dizilla.js', async (url) => {
+    const u = String(url);
+    if (u.includes('/tv/1396')) return response({ json: { name: 'Breaking Bad', original_name: 'Breaking Bad' } });
+    if (u.includes('/ara?q=')) return response({ text: '<a href="/dizi/breaking-bad">Breaking Bad</a>' });
+    if (u === 'https://dizilla.la/dizi/breaking-bad') return response({ text: '<a href="/breaking-bad-1-sezon-1-bolum">S1E1</a>' });
+    if (u === 'https://dizilla.la/breaking-bad-1-sezon-1-bolum') return response({ text: '<script>var src="https://four.pichive.online/iframe.php?v=abc";</script>' });
+    if (u === 'https://four.pichive.online/iframe.php?v=abc') return response({ text: '<script>var NP_CONFIG = {"sources":[{"kind":"sub","master":"https://cdn.pichive.online/nm.php?id=1"}],"subtitles":[{"label":"Türkçe","lang":"tr","url":"https://cdn.pichive.online/nsub.php?id=1"}]};</script>' });
+    return response({ ok: false });
+  });
+  const streams = await provider.getStreams(1396, 'tv', 1, 1);
+  assert.equal(streams.length, 1);
+  assert.equal(streams[0].url, 'https://cdn.pichive.online/nm.php?id=1');
+  assert.equal(streams[0].format, 'm3u8');
+  assert.equal(streams[0].headers.Referer, 'https://four.pichive.online/iframe.php?v=abc');
+  assert.equal(streams[0].headers['User-Agent'], 'okhttp/4.9.2');
+  assert.equal(streams[0].provider, 'castsinema-dizilla');
+});

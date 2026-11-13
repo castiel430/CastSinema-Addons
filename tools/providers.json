@@ -160,5 +160,19 @@
       "tmdbId": "550",
       "type": "movie"
     }
+  },
+  "castsinema-dizilla": {
+    "file": "providers/castsinema-dizilla.js",
+    "hostVar": "BASE",
+    "hostStyle": "single",
+    "base": "dizilla",
+    "www": false,
+    "marker": "dizilla",
+    "test": {
+      "tmdbId": "1396",
+      "type": "tv",
+      "season": 1,
+      "episode": 1
+    }
   }
 }

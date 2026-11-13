@@ -18,7 +18,14 @@ function requestProfiles() {
   var firefox = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0";
   var edge = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 Edg/139.0.0.0";
   var safari = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.2 Safari/605.1.15";
-  return [profileHeaders(chrome), profileHeaders(firefox), profileHeaders(edge), profileHeaders(safari), {}];
+  return [
+    profileHeaders("Dalvik/2.1.0 (Linux; U; Android 13; SM-G998B Build/TP1A.220624.014)"),
+    profileHeaders("okhttp/4.9.2"),
+    profileHeaders("ExoPlayerLib/2.19.1"),
+    profileHeaders("stagefright/1.2 (Linux;Android 11)"),
+    profileHeaders("VLC/3.0.21 LibVLC/3.0.21"),
+    profileHeaders(chrome), profileHeaders(firefox), profileHeaders(edge), profileHeaders(safari), {}
+  ];
 }
 var KEEP_HEADERS = ["accept", "referer", "origin", "range", "cookie", "content-type", "x-requested-with"];
 function mergeHeaders(base, profile) {
