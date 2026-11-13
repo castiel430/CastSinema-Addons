@@ -104,14 +104,13 @@ test('FilmModu provider searches and decrypts Vidmixi player to extract HLS stre
     cipher.final()
   ]);
   const setJson = JSON.stringify({ ct: encrypted.toString('base64'), s: salt.toString('hex') });
+  const ilkpartkod = btoa('<iframe src="https://vidmixi.example/embed/10"></iframe>');
 
-  const provider = await loadProvider('providers/castsinema-filmmodu.js', async (url) => {
+  const provider = await loadProvider('providers/castsinema-filmmodu.js', async (url, options = {}) => {
     const u = String(url);
-    if (u.includes('/movie/550')) return response({ json: { title: 'Fight Club', original_title: 'Fight Club' } });
-    if (u === 'https://filmmodu.cc/') return response({ text: '<meta name="csrf-token" content="CSRF123">' });
-    if (u === 'https://filmmodu.cc/arama/oneri') return response({ text: JSON.stringify({ films: [{ title: 'Fight Club', url: '/film/fight-club' }] }) });
-    if (u === 'https://filmmodu.cc/film/fight-club') return response({ text: '<div id="f_player" data-k=\'[{"i":10,"s":"tr"}]\'></div>' });
-    if (u === 'https://filmmodu.cc/px') return response({ text: JSON.stringify({ u: 'https://vidmixi.example/embed/10' }) });
+    if (u.includes('/movie/550')) return response({ json: { title: 'Fight Club', original_title: 'Fight Club', imdb_id: 'tt0137523' } });
+    if (u === 'https://filmmodu.cc/arama/') return response({ text: '<a href="https://filmmodu.cc/film/fight-club">Fight Club</a>' });
+    if (u === 'https://filmmodu.cc/film/fight-club') return response({ text: "<script>var ilkpartkod='" + ilkpartkod + "';</script>" });
     if (u === 'https://vidmixi.example/embed/10') return response({ text: `<script>bePlayer('${password}', '${setJson.replace(/\\/g, '\\\\')}');</script>` });
     return response({ ok: false });
   });
@@ -119,6 +118,7 @@ test('FilmModu provider searches and decrypts Vidmixi player to extract HLS stre
   assert.equal(streams.length, 1);
   assert.equal(streams[0].url, 'https://cdn.example/filmmodu.m3u8');
 });
+
 
 test('DiziMom provider searches and extracts HLS stream for TV series', async () => {
   const provider = await loadProvider('providers/castsinema-dizimom.js', async (url) => {
@@ -152,8 +152,8 @@ test('FilmMakinesi provider searches and extracts iframe stream', async () => {
   const provider = await loadProvider('providers/castsinema-filmmakinesi.js', async (url) => {
     const u = String(url);
     if (u.includes('/movie/550')) return response({ json: { title: 'Fight Club', imdb_id: 'tt0137523', external_ids: { imdb_id: 'tt0137523' } } });
-    if (u.includes('arama/?s=')) return response({ text: '<a class="item" href="/film/fight-club-1999" data-title="Fight Club"></a>' });
-    if (u === 'https://filmmakinesi.to/film/fight-club-1999') return response({ text: '<iframe data-src="https://closeload.filmmakinesi.to/video/embed/abc"></iframe>' });
+    if (u.includes('/?s=') || u.includes('/arama/')) return response({ text: '<a class="mini-poster" href="https://filmmakinesi.tv/film/fight-club-1999/"></a>' });
+    if (u === 'https://filmmakinesi.tv/film/fight-club-1999/') return response({ text: '<iframe data-src="https://closeload.filmmakinesi.to/video/embed/abc"></iframe>' });
     return response({ ok: false });
   });
   const streams = await provider.getStreams(550, 'movie', null, null);
@@ -162,33 +162,39 @@ test('FilmMakinesi provider searches and extracts iframe stream', async () => {
 });
 
 test('FilmMakinesi provider resolves a TV episode from the series page', async () => {
-  const provider = await loadProvider('providers/castsinema-filmmakinesi.js', async () => {
+  const provider = await loadProvider('providers/castsinema-filmmakinesi.js', async (url) => {
+    const u = String(url);
+    if (u.includes('/tv/1399')) return response({ json: { name: 'Game of Thrones', external_ids: { imdb_id: 'tt0944947' } } });
+    if (u.includes('/?s=') || u.includes('/arama/')) return response({ text: '<a class="mini-poster" href="https://filmmakinesi.tv/dizi/game-of-thrones/"></a>' });
+    if (u === 'https://filmmakinesi.tv/dizi/game-of-thrones/sezon-2-bolum-3/') return response({ text: '<iframe src="https://closeload.filmmakinesi.to/video/embed/got23"></iframe>' });
     return response({ ok: false });
   });
   const streams = await provider.getStreams(1399, 'tv', 2, 3);
-  assert.deepEqual(Array.from(streams), []);
+  assert.equal(streams.length, 1);
+  assert.equal(streams[0].url, 'https://closeload.filmmakinesi.to/video/embed/got23');
 });
 
 test('FilmMakinesi provider never returns a trailer as the episode source', async () => {
-  const provider = await loadProvider('providers/castsinema-filmmakinesi.js', async () => {
+  const provider = await loadProvider('providers/castsinema-filmmakinesi.js', async (url) => {
+    const u = String(url);
+    if (u.includes('/movie/550')) return response({ json: { title: 'Fight Club', external_ids: { imdb_id: 'tt0137523' } } });
+    if (u.includes('/?s=') || u.includes('/arama/')) return response({ text: '<a class="mini-poster" href="https://filmmakinesi.tv/film/fight-club-1999/"></a>' });
+    if (u === 'https://filmmakinesi.tv/film/fight-club-1999/') return response({ text: '<iframe src="https://www.youtube.com/embed/trailer"></iframe>' });
     return response({ ok: false });
   });
   const streams = await provider.getStreams(550, 'movie', null, null);
   assert.equal(streams.length, 0);
 });
 
-test('DiziBox provider searches directory and extracts episode stream', async () => {
+
+test('DiziBox provider finds episode and extracts m3u8 stream', async () => {
   const provider = await loadProvider('providers/castsinema-dizibox.js', async (url) => {
     const u = String(url);
-    if (u.includes('/tv/1104')) return response({ json: { name: 'Game of Thrones', external_ids: { imdb_id: 'tt0944947' } } });
-    if (u.includes('/ara?q=')) return response({ json: [{ id: 1104, title: 'Game of Thrones', slug: 'game-of-thrones', poster_url: '/uploads/posters/tt0944947-poster.webp' }] });
-    if (u === 'https://www.dizibox.live/dizi/game-of-thrones') {
-      const code = btoa('https://www.dizibox.live/boxes/got').split('').reverse().join('');
-      return response({ text: `<div data-player-code="${code}"></div>` });
-    }
-    if (u === 'https://www.dizibox.live/boxes/got') {
-      return response({ text: `<script>jwplayer('player').setup(JSON.parse('{"file":"https://cdn.example/dizibox.m3u8"}'));</script>` });
-    }
+    if (u.includes('/tv/1104')) return response({ json: { name: 'Game of Thrones', original_name: 'Game of Thrones', external_ids: { imdb_id: 'tt0944947' } } });
+    if (u.includes('/ara?q=')) return response({ json: [{ slug: 'game-of-thrones-izle', title: 'Game of Thrones', poster_url: '/tt0944947.jpg' }] });
+    if (u === 'https://www.dizibox.live/diziler/game-of-thrones-izle/') return response({ text: '<a href="/game-of-thrones-izle-1-sezon-1-bolum-izle/">S1E1</a>' });
+    if (u === 'https://www.dizibox.live/game-of-thrones-izle-1-sezon-1-bolum-izle/') return response({ text: '<iframe src="https://player.example/king.php?v=1"></iframe>' });
+    if (u === 'https://player.example/king.php?v=1') return response({ text: 'var x="https://cdn.example/dizibox.m3u8";' });
     return response({ ok: false });
   });
   const streams = await provider.getStreams(1104, 'tv', 1, 1);
@@ -196,12 +202,13 @@ test('DiziBox provider searches directory and extracts episode stream', async ()
   assert.equal(streams[0].url, 'https://cdn.example/dizibox.m3u8');
 });
 
+
 test('HDFilmCehennemi provider searches and extracts embed stream', async () => {
   const provider = await loadProvider('providers/castsinema-hdfilmcehennemi.js', async (url) => {
     const u = String(url);
     if (u.includes('/movie/550')) return response({ json: { title: 'Fight Club', imdb_id: 'tt0137523', external_ids: { imdb_id: 'tt0137523' } } });
-    if (u.includes('/search?q=')) return response({ text: JSON.stringify({ results: ['<a href="https://www.hdfilmcehennemi.nl/fight-club-izle/">Fight Club</a>'] }) });
-    if (u === 'https://www.hdfilmcehennemi.nl/fight-club-izle/') return response({ text: '<iframe class="close" data-src="https://hdfilmcehennemi.mobi/video/embed/fc25/?rapidrame_id=abc"></iframe>' });
+    if (u.includes('/search')) return response({ text: JSON.stringify({ results: ['<a href="https://hdfilmcehennemi.la/fight-club-izle/">Fight Club</a>'] }) });
+    if (u === 'https://hdfilmcehennemi.la/fight-club-izle/') return response({ text: '<iframe class="close" data-src="https://hdfilmcehennemi.mobi/video/embed/fc25/?rapidrame_id=abc"></iframe>' });
     return response({ ok: false });
   });
   const streams = await provider.getStreams(550, 'movie', null, null);
@@ -209,13 +216,19 @@ test('HDFilmCehennemi provider searches and extracts embed stream', async () => 
   assert.ok(streams[0].url.includes('hdfilmcehennemi.mobi/video/embed/fc25'));
 });
 
-test('HDFilmCehennemi provider does not offer series', async () => {
-  const provider = await loadProvider('providers/castsinema-hdfilmcehennemi.js', async () => {
+test('HDFilmCehennemi provider extracts TV episode embed stream', async () => {
+  const provider = await loadProvider('providers/castsinema-hdfilmcehennemi.js', async (url) => {
+    const u = String(url);
+    if (u.includes('/tv/1399')) return response({ json: { name: 'Game of Thrones', external_ids: { imdb_id: 'tt0944947' } } });
+    if (u.includes('/search')) return response({ text: JSON.stringify({ results: ['<a href="https://hdfilmcehennemi.la/dizi/game-of-thrones/">GoT</a>'] }) });
+    if (u === 'https://hdfilmcehennemi.la/dizi/game-of-thrones/sezon-2-bolum-3/') return response({ text: '<iframe src="https://close.example/embed/got23"></iframe>' });
     return response({ ok: false });
   });
   const streams = await provider.getStreams(1399, 'tv', 2, 3);
-  assert.deepEqual(Array.from(streams), []);
+  assert.equal(streams.length, 1);
+  assert.equal(streams[0].url, 'https://close.example/embed/got23');
 });
+
 
 test('BoxFilm provider decodes the rotated player code into an HLS manifest', async () => {
   const calls = [];
