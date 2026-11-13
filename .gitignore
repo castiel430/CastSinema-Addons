@@ -1,0 +1,11 @@
+node_modules/
+__pycache__/
+*.pyc
+.env
+.env.*
+.github-token
+reports/
+dist-live/
+.previous-live/
+.DS_Store
+*.log

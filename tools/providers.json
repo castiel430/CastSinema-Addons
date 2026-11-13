@@ -1,0 +1,176 @@
+{
+  "castsinema-boxfilm": {
+    "file": "providers/castsinema-boxfilm.js",
+    "hostVar": "HOST",
+    "hostStyle": "single",
+    "base": "boxfilm",
+    "www": false,
+    "marker": "BoxFilm",
+    "test": {
+      "tmdbId": "603",
+      "type": "movie"
+    }
+  },
+  "castsinema-dizibox": {
+    "file": "providers/castsinema-dizibox.js",
+    "hostVar": "DEFAULT_SITE",
+    "hostStyle": "single",
+    "base": "dizibox",
+    "www": true,
+    "marker": "dizibox",
+    "test": {
+      "tmdbId": "1104",
+      "type": "tv",
+      "season": 1,
+      "episode": 1
+    }
+  },
+  "castsinema-clipbox": {
+    "file": "providers/castsinema-clipbox.js",
+    "hostVar": "HOST",
+    "hostStyle": "single",
+    "base": "vixsrc",
+    "www": false,
+    "marker": "vixsrc",
+    "test": {
+      "tmdbId": "550",
+      "type": "movie"
+    }
+  },
+  "castsinema-vidup": {
+    "file": "providers/castsinema-vidup.js",
+    "hostVar": "VIDUP",
+    "hostStyle": "single",
+    "base": "vidup",
+    "www": false,
+    "marker": "vidup",
+    "test": {
+      "tmdbId": "550",
+      "type": "movie"
+    }
+  },
+  "castsinema-hexa": {
+    "file": "providers/castsinema-hexa.js",
+    "hostVar": "HEXA_API",
+    "hostStyle": "single",
+    "base": "theemoviedb.hexa",
+    "www": false,
+    "marker": "hexa",
+    "test": {
+      "tmdbId": "550",
+      "type": "movie"
+    }
+  },
+  "castsinema-xpass": {
+    "file": "providers/castsinema-xpass.js",
+    "hostVar": "XPASS",
+    "hostStyle": "single",
+    "base": "play.xpass",
+    "www": false,
+    "marker": "xpass",
+    "test": {
+      "tmdbId": "550",
+      "type": "movie"
+    }
+  },
+  "castsinema-filmmodu": {
+    "file": "providers/castsinema-filmmodu.js",
+    "hostVar": "HOST",
+    "hostStyle": "single",
+    "base": "filmmodu",
+    "www": false,
+    "marker": "filmmodu",
+    "test": {
+      "tmdbId": "550",
+      "type": "movie"
+    }
+  },
+  "castsinema-dizimom": {
+    "file": "providers/castsinema-dizimom.js",
+    "hostVar": "HOST",
+    "hostStyle": "single",
+    "base": "ddizimom",
+    "www": false,
+    "marker": "dizimom",
+    "test": {
+      "tmdbId": "1399",
+      "type": "tv",
+      "season": 1,
+      "episode": 1
+    }
+  },
+  "castsinema-setfilmizle": {
+    "file": "providers/castsinema-setfilmizle.js",
+    "hostVar": "HOST",
+    "hostStyle": "single",
+    "base": "www.setfilmizle",
+    "www": false,
+    "marker": "setfilmizle",
+    "test": {
+      "tmdbId": "550",
+      "type": "movie"
+    }
+  },
+  "castsinema-filmmakinesi": {
+    "file": "providers/castsinema-filmmakinesi.js",
+    "hostVar": "HOSTS",
+    "hostStyle": "list",
+    "base": "filmmakinesi",
+    "www": false,
+    "marker": "FilmMakinesi",
+    "test": {
+      "tmdbId": "550",
+      "type": "movie"
+    }
+  },
+  "castsinema-hdfilmcehennemi": {
+    "file": "providers/castsinema-hdfilmcehennemi.js",
+    "hostVar": "HOSTS",
+    "hostStyle": "list",
+    "base": "hdfilmcehennemi",
+    "www": true,
+    "marker": "hdfilmcehennemi",
+    "test": {
+      "tmdbId": "550",
+      "type": "movie"
+    }
+  },
+  "castsinema-fullhdfilmizlesene": {
+    "file": "providers/castsinema-fullhdfilmizlesene.js",
+    "hostVar": "HOSTS",
+    "hostStyle": "list",
+    "base": "fullhdfilmizlesene",
+    "www": true,
+    "marker": "FullHDFilmizlesene",
+    "test": {
+      "tmdbId": "550",
+      "type": "movie"
+    }
+  },
+  "castsinema-webteizle": {
+    "file": "providers/castsinema-webteizle.js",
+    "hostVar": "DEFAULT_SITE",
+    "hostStyle": "single",
+    "base": "webteizle",
+    "www": true,
+    "marker": "Webteizle",
+    "test": {
+      "tmdbId": "550",
+      "type": "movie"
+    }
+  },
+  "castsinema-sezonlukdizi": {
+    "file": "providers/castsinema-sezonlukdizi.js",
+    "hostVar": "DEFAULT_SITE",
+    "hostStyle": "single",
+    "base": "sezonlukdizi",
+    "www": true,
+    "marker": "Sezonluk Dizi",
+    "test": {
+      "tmdbId": "1399",
+      "type": "tv",
+      "season": 1,
+      "episode": 1
+    }
+  }
+}

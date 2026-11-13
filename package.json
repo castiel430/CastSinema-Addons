@@ -1,0 +1,13 @@
+{
+  "name": "castsinema-addons",
+  "version": "1.0.0",
+  "description": "CastSinema - Turkish content scrapers",
+  "main": "manifest.json",
+  "scripts": {
+    "test": "npm run validate && node --test tests/*.test.mjs",
+    "validate": "node scripts/validate.mjs",
+    "set-repo": "node scripts/set-repo.mjs"
+  },
+  "license": "MIT",
+  "author": "CastSinema"
+}

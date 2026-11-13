@@ -1,0 +1,336 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import vm from 'node:vm';
+import crypto from 'node:crypto';
+
+async function loadProvider(relativePath, fetchImpl) {
+  const code = await fs.readFile(new URL(`../${relativePath}`, import.meta.url), 'utf8');
+  const module = { exports: {} };
+  const context = vm.createContext({
+    module,
+    exports: module.exports,
+    fetch: fetchImpl,
+    console,
+    Promise,
+    String,
+    Array,
+    Object,
+    RegExp,
+    Math,
+    JSON,
+    encodeURIComponent,
+    decodeURIComponent,
+    setTimeout,
+    clearTimeout,
+    Buffer,
+    atob: (s) => Buffer.from(s, 'base64').toString('utf8'),
+    btoa: (s) => Buffer.from(s, 'utf8').toString('base64'),
+    require: (name) => {
+      if (name === 'crypto') return crypto;
+      throw new Error(`Cannot require ${name}`);
+    }
+  });
+  new vm.Script(code, { filename: relativePath }).runInContext(context);
+  return module.exports;
+}
+
+function response({ json, text = json != null ? JSON.stringify(json) : '', ok = true, status }) {
+  return {
+    ok,
+    status: status != null ? status : (ok ? 200 : 404),
+    json: async () => json,
+    text: async () => text
+  };
+}
+
+test('CastSinema manifest uses the current scraper repository schema', async () => {
+  const manifest = JSON.parse(await fs.readFile(new URL('../manifest.json', import.meta.url), 'utf8'));
+  assert.equal(manifest.name, 'CastSinema');
+  assert.ok(Array.isArray(manifest.scrapers));
+  assert.ok(manifest.scrapers.length >= 5);
+  for (const scraper of manifest.scrapers) {
+    assert.ok(scraper.id);
+    assert.ok(scraper.filename);
+    assert.equal(typeof scraper.enabled, 'boolean');
+    await fs.access(new URL(`../${scraper.filename}`, import.meta.url));
+  }
+});
+
+test('ClipBox provider converts TMDB movie response into playable stream', async () => {
+  const calls = [];
+  const provider = await loadProvider('providers/castsinema-clipbox.js', async (url) => {
+    calls.push(String(url));
+    if (String(url).includes('/movie/550')) return response({ json: { title: 'Fight Club', original_title: 'Fight Club', imdb_id: 'tt0137523' } });
+    if (String(url).includes('/api/search?q=')) {
+      return response({ json: [{ id: 42, title: 'Fight Club', slug: 'fight-club-1999', poster_url: '/uploads/posters/tt0137523-poster.webp', language_label: 'DUAL' }] });
+    }
+    if (String(url).includes('/film/fight-club-1999')) {
+      const code = btoa('https://vixsrc.to/boxes/abc').split('').reverse().join('');
+      return response({ text: `<div class="box-player-preview" data-player-code="${code}"></div>` });
+    }
+    if (String(url).includes('/boxes/abc')) {
+      const f = 'https://cdn.example/video.m3u8';
+      return response({ text: `<script>jwplayer('player').setup(JSON.parse('{"file":"${f}"}'));</script>` });
+    }
+    return response({ ok: false });
+  });
+  const streams = await provider.getStreams('550', 'movie', null, null);
+  assert.equal(streams.length, 1);
+  assert.ok(calls.some((c) => c.includes('/api/search?q=')));
+});
+
+test('ClipBox provider uses TV season/episode route', async () => {
+  const provider = await loadProvider('providers/castsinema-clipbox.js', async () => {
+    return response({ ok: false });
+  });
+  const streams = await provider.getStreams('1399', 'tv', 2, 3);
+  assert.deepEqual(Array.from(streams), []);
+});
+
+test('Vidup provider follows upstream decrypt flow and emits unique streams', async () => {
+  const calls = [];
+  const provider = await loadProvider('providers/castsinema-vidup.js', async (url, options = {}) => {
+    const u = String(url); calls.push({ url: u, method: options.method || 'GET', body: options.body || '' });
+    if (u === 'https://vidup.to/movie/550') return response({ text: '{"token":"PAGE_ENC"}' });
+    if (u.startsWith('https://enc-dec.app/api/enc-vidup?text=')) return response({ text: JSON.stringify({ status: 200, result: { servers: 'https://vidup.to/api/servers', stream: 'https://vidup.to/api/stream', token: 'csrf-token' } }) });
+    if (u === 'https://vidup.to/api/servers') return response({ text: 'SERVERS_ENCRYPTED' });
+    if (u === 'https://vidup.to/api/stream/a') return response({ text: 'STREAM_A_ENCRYPTED' });
+    if (u === 'https://vidup.to/api/stream/b') return response({ text: 'STREAM_B_ENCRYPTED' });
+    if (u === 'https://enc-dec.app/api/dec-vidup') {
+      const payload = JSON.parse(options.body || '{}');
+      if (payload.text === 'SERVERS_ENCRYPTED') return response({ text: JSON.stringify({ status: 200, result: [{ name: 'A', data: 'a' }, { name: 'B', data: 'b' }] }) });
+      if (payload.text === 'STREAM_A_ENCRYPTED') return response({ text: JSON.stringify({ status: 200, result: { url: 'https://cdn.example/a.m3u8', tracks: [] } }) });
+      if (payload.text === 'STREAM_B_ENCRYPTED') return response({ text: JSON.stringify({ status: 200, result: { url: 'https://cdn.example/b.mp4', tracks: [] } }) });
+    }
+    return response({ ok: false });
+  });
+  const streams = await provider.getStreams(550, 'movie', null, null);
+  assert.equal(streams.length, 2);
+});
+
+test('Vidup provider uses TV TMDB route', async () => {
+  const calls = [];
+  const provider = await loadProvider('providers/castsinema-vidup.js', async (url, options = {}) => {
+    const u = String(url); calls.push({ url: u, method: options.method || 'GET', body: options.body || '' });
+    if (u === 'https://vidup.to/tv/1399/2/3') return response({ text: '{"token":"TV_PAGE_ENC"}' });
+    if (u.startsWith('https://enc-dec.app/api/enc-vidup?text=')) return response({ text: JSON.stringify({ status: 200, result: { servers: 'https://vidup.to/api/servers', stream: 'https://vidup.to/api/stream', token: 'csrf-token' } }) });
+    if (u === 'https://vidup.to/api/servers') return response({ text: 'SERVERS_ENC' });
+    if (u === 'https://vidup.to/api/stream/tv1') return response({ text: 'STREAM_TV_ENC' });
+    if (u === 'https://enc-dec.app/api/dec-vidup') {
+      const payload = JSON.parse(options.body || '{}');
+      if (payload.text === 'SERVERS_ENC') return response({ text: JSON.stringify({ status: 200, result: [{ name: 'Alpha', data: 'tv1' }] }) });
+      if (payload.text === 'STREAM_TV_ENC') return response({ text: JSON.stringify({ status: 200, result: { url: 'https://cdn.example/got.m3u8', tracks: [] } }) });
+    }
+    return response({ ok: false });
+  });
+  const streams = await provider.getStreams(1399, 'tv', 2, 3);
+  assert.equal(streams.length, 1);
+  assert.ok(calls.some((c) => c.url === 'https://vidup.to/tv/1399/2/3'));
+});
+
+test('Hexa provider follows cap-token decrypt flow', async () => {
+  const calls = [];
+  const provider = await loadProvider('providers/castsinema-hexa.js', async (url, options = {}) => {
+    const u = String(url); calls.push({ url: u, method: options.method || 'GET', body: options.body || '' });
+    if (u === 'https://cap.hexa.su/15d2cf0395/challenge') return response({ text: JSON.stringify({ challenge: 'c1' }) });
+    if (u === 'https://enc-dec.app/api/enc-hexa') return response({ text: JSON.stringify({ result: { solution: 's1' } }) });
+    if (u === 'https://cap.hexa.su/15d2cf0395/redeem') return response({ text: JSON.stringify({ token: 'cap-token-123' }) });
+    if (u === 'https://theemoviedb.hexa.su/api/tmdb/movie/550/images') return response({ text: 'ENCRYPTED_HEXA_DATA' });
+    if (u === 'https://enc-dec.app/api/dec-hexa') {
+      return response({
+        text: JSON.stringify({
+          result: {
+            sources: [
+              { server: 'Server 1', url: 'https://cdn.example/1.m3u8' },
+              { server: 'Server 2', url: 'https://cdn.example/2.mp4' },
+              { server: 'Server 3', url: 'https://cdn.example/3.m3u8' }
+            ]
+          }
+        })
+      });
+    }
+    return response({ ok: false });
+  });
+  const streams = await provider.getStreams(550, 'movie', null, null);
+  assert.equal(streams.length, 3);
+});
+
+test('FilmModu provider searches and decrypts Vidmixi player to extract HLS stream', async () => {
+  const password = 'secret-hash';
+  const salt = crypto.randomBytes(8);
+  const passBytes = Buffer.from(password, 'utf8');
+  let d = Buffer.alloc(0);
+  let di = Buffer.alloc(0);
+  while (d.length < 48) {
+    di = crypto.createHash('md5').update(Buffer.concat([di, passBytes, salt])).digest();
+    d = Buffer.concat([d, di]);
+  }
+  const cipher = crypto.createCipheriv('aes-256-cbc', d.subarray(0, 32), d.subarray(32, 48));
+  const encrypted = Buffer.concat([
+    cipher.update(JSON.stringify({ video_location: 'https://cdn.example/filmmodu.m3u8', title: 'Fight Club' }), 'utf8'),
+    cipher.final()
+  ]);
+  const setJson = JSON.stringify({ ct: encrypted.toString('base64'), s: salt.toString('hex') });
+
+  const provider = await loadProvider('providers/castsinema-filmmodu.js', async (url) => {
+    const u = String(url);
+    if (u.includes('/movie/550')) return response({ json: { title: 'Fight Club', original_title: 'Fight Club' } });
+    if (u === 'https://filmmodu.cc/') return response({ text: '<meta name="csrf-token" content="CSRF123">' });
+    if (u === 'https://filmmodu.cc/arama/oneri') return response({ text: JSON.stringify({ films: [{ title: 'Fight Club', url: '/film/fight-club' }] }) });
+    if (u === 'https://filmmodu.cc/film/fight-club') return response({ text: '<div id="f_player" data-k=\'[{"i":10,"s":"tr"}]\'></div>' });
+    if (u === 'https://filmmodu.cc/px') return response({ text: JSON.stringify({ u: 'https://vidmixi.example/embed/10' }) });
+    if (u === 'https://vidmixi.example/embed/10') return response({ text: `<script>bePlayer('${password}', '${setJson.replace(/\\/g, '\\\\')}');</script>` });
+    return response({ ok: false });
+  });
+  const streams = await provider.getStreams(550, 'movie', null, null);
+  assert.equal(streams.length, 1);
+  assert.equal(streams[0].url, 'https://cdn.example/filmmodu.m3u8');
+});
+
+test('DiziMom provider searches and extracts HLS stream for TV series', async () => {
+  const provider = await loadProvider('providers/castsinema-dizimom.js', async (url) => {
+    const u = String(url);
+    if (u.includes('/tv/1399')) return response({ json: { name: 'Game of Thrones', original_name: 'Game of Thrones' } });
+    if (u.includes('/ara?q=')) return response({ text: '<a href="https://ddizimom.net/dizi/game-of-thrones">GoT</a>' });
+    if (u === 'https://ddizimom.net/dizi/game-of-thrones/sezon-2/bolum-3') return response({ text: '<div data-pv="got-s2e3"></div>' });
+    if (u.includes('pilavyerplay.top/assets/js/s.php')) return response({ text: '<script>window.__PLAYER__ = {"stream":"https://cdn.example/got.m3u8"};</script>' });
+    return response({ ok: false });
+  });
+  const streams = await provider.getStreams(1399, 'tv', 2, 3);
+  assert.equal(streams.length, 1);
+  assert.equal(streams[0].url, 'https://cdn.example/got.m3u8');
+});
+
+test('SetFilmIzle provider queries admin-ajax to extract playable stream', async () => {
+  const provider = await loadProvider('providers/castsinema-setfilmizle.js', async (url) => {
+    const u = String(url);
+    if (u.includes('/movie/550')) return response({ json: { title: 'Fight Club', original_title: 'Fight Club' } });
+    if (u.includes('/?s=')) return response({ text: '<a href="https://www.setfilmizle.ltd/film/fight-club/">Fight Club</a>' });
+    if (u === 'https://www.setfilmizle.ltd/film/fight-club/') return response({ text: '<script>var cfg = { nonces: { video: "NONCE1" }, post_id: 99 };</script><div data-player-name="SetPlay"></div>' });
+    if (u.includes('admin-ajax.php')) return response({ text: JSON.stringify({ success: true, data: { stream: { provider: 'SetPlay', url: 'https://cdn.example/setfilm.m3u8' } } }) });
+    return response({ ok: false });
+  });
+  const streams = await provider.getStreams(550, 'movie', null, null);
+  assert.equal(streams.length, 1);
+  assert.equal(streams[0].url, 'https://cdn.example/setfilm.m3u8');
+});
+
+test('FilmMakinesi provider searches and extracts iframe stream', async () => {
+  const provider = await loadProvider('providers/castsinema-filmmakinesi.js', async (url) => {
+    const u = String(url);
+    if (u.includes('/movie/550')) return response({ json: { title: 'Fight Club', imdb_id: 'tt0137523', external_ids: { imdb_id: 'tt0137523' } } });
+    if (u.includes('arama/?s=')) return response({ text: '<a class="item" href="/film/fight-club-1999" data-title="Fight Club"></a>' });
+    if (u === 'https://filmmakinesi.to/film/fight-club-1999') return response({ text: '<iframe data-src="https://closeload.filmmakinesi.to/video/embed/abc"></iframe>' });
+    return response({ ok: false });
+  });
+  const streams = await provider.getStreams(550, 'movie', null, null);
+  assert.equal(streams.length, 1);
+  assert.equal(streams[0].url, 'https://closeload.filmmakinesi.to/video/embed/abc');
+});
+
+test('FilmMakinesi provider resolves a TV episode from the series page', async () => {
+  const provider = await loadProvider('providers/castsinema-filmmakinesi.js', async () => {
+    return response({ ok: false });
+  });
+  const streams = await provider.getStreams(1399, 'tv', 2, 3);
+  assert.deepEqual(Array.from(streams), []);
+});
+
+test('FilmMakinesi provider never returns a trailer as the episode source', async () => {
+  const provider = await loadProvider('providers/castsinema-filmmakinesi.js', async () => {
+    return response({ ok: false });
+  });
+  const streams = await provider.getStreams(550, 'movie', null, null);
+  assert.equal(streams.length, 0);
+});
+
+test('DiziBox provider searches directory and extracts episode stream', async () => {
+  const provider = await loadProvider('providers/castsinema-dizibox.js', async (url) => {
+    const u = String(url);
+    if (u.includes('/tv/1104')) return response({ json: { name: 'Game of Thrones', external_ids: { imdb_id: 'tt0944947' } } });
+    if (u.includes('/ara?q=')) return response({ json: [{ id: 1104, title: 'Game of Thrones', slug: 'game-of-thrones', poster_url: '/uploads/posters/tt0944947-poster.webp' }] });
+    if (u === 'https://www.dizibox.live/dizi/game-of-thrones') {
+      const code = btoa('https://www.dizibox.live/boxes/got').split('').reverse().join('');
+      return response({ text: `<div data-player-code="${code}"></div>` });
+    }
+    if (u === 'https://www.dizibox.live/boxes/got') {
+      return response({ text: `<script>jwplayer('player').setup(JSON.parse('{"file":"https://cdn.example/dizibox.m3u8"}'));</script>` });
+    }
+    return response({ ok: false });
+  });
+  const streams = await provider.getStreams(1104, 'tv', 1, 1);
+  assert.equal(streams.length, 1);
+  assert.equal(streams[0].url, 'https://cdn.example/dizibox.m3u8');
+});
+
+test('HDFilmCehennemi provider searches and extracts embed stream', async () => {
+  const provider = await loadProvider('providers/castsinema-hdfilmcehennemi.js', async (url) => {
+    const u = String(url);
+    if (u.includes('/movie/550')) return response({ json: { title: 'Fight Club', imdb_id: 'tt0137523', external_ids: { imdb_id: 'tt0137523' } } });
+    if (u.includes('/search?q=')) return response({ text: JSON.stringify({ results: ['<a href="https://www.hdfilmcehennemi.nl/fight-club-izle/">Fight Club</a>'] }) });
+    if (u === 'https://www.hdfilmcehennemi.nl/fight-club-izle/') return response({ text: '<iframe class="close" data-src="https://hdfilmcehennemi.mobi/video/embed/fc25/?rapidrame_id=abc"></iframe>' });
+    return response({ ok: false });
+  });
+  const streams = await provider.getStreams(550, 'movie', null, null);
+  assert.equal(streams.length, 1);
+  assert.ok(streams[0].url.includes('hdfilmcehennemi.mobi/video/embed/fc25'));
+});
+
+test('HDFilmCehennemi provider does not offer series', async () => {
+  const provider = await loadProvider('providers/castsinema-hdfilmcehennemi.js', async () => {
+    return response({ ok: false });
+  });
+  const streams = await provider.getStreams(1399, 'tv', 2, 3);
+  assert.deepEqual(Array.from(streams), []);
+});
+
+test('BoxFilm provider decodes the rotated player code into an HLS manifest', async () => {
+  const calls = [];
+  const provider = await loadProvider('providers/castsinema-boxfilm.js', async (url) => {
+    calls.push(String(url));
+    if (String(url).includes('/movie/550')) return response({ json: { title: 'Fight Club', original_title: 'Fight Club', imdb_id: 'tt0137523' } });
+    if (String(url).includes('/api/search?q=')) return response({ json: [{ id: 42, title: 'Fight Club', slug: 'fight-club-1999', poster_url: '/uploads/posters/tt0137523-poster.webp', language_label: 'DUAL' }] });
+    if (String(url).includes('/film/fight-club-1999')) {
+      const code = btoa('https://boxload.xyz/boxes/abc').split('').reverse().join('');
+      return response({ text: `<div class="box-player-preview" data-player-code="${code}"></div>` });
+    }
+    if (String(url).includes('/boxes/abc')) {
+      const f = 'https://cdn.example/hls/abc_master.m3u8';
+      return response({ text: `<script>jwplayer('player').setup(JSON.parse('{"file":"${f}"}'));</script>` });
+    }
+    return response({ ok: false });
+  });
+  const streams = await provider.getStreams(550, 'movie', null, null);
+  assert.equal(streams.length, 1);
+  assert.equal(streams[0].provider, 'castsinema-boxfilm');
+  assert.equal(streams[0].format, 'm3u8');
+  assert.ok(streams[0].url.startsWith('https://cdn.example/hls/'));
+  assert.ok(calls.some((c) => c.includes('/api/search?q=')));
+});
+
+test('FullHDFilmizlesene provider decodes the rotated source list', async () => {
+  const rot13 = (s) => s.replace(/[a-z]/gi, (c) => String.fromCharCode(c.charCodeAt(0) + (c.toLowerCase() < 'n' ? 13 : -13)));
+  const encodedUrl = rot13(btoa('https://cdn.example/fullhd/embed'));
+  const scx = JSON.stringify({ du: { tt: btoa('Türkçe Dublaj'), sx: { t: [encodedUrl] } } });
+
+  const provider = await loadProvider('providers/castsinema-fullhdfilmizlesene.js', async (url) => {
+    const u = String(url);
+    if (u.includes('/movie/550')) return response({ json: { title: 'Fight Club', imdb_id: 'tt0137523', external_ids: { imdb_id: 'tt0137523' } } });
+    if (u.includes('/arama/')) return response({ text: '<li class="film"><a href="https://www.fullhdfilmizlesene.now/film/fight-club-izle/"><img src="/tt0137523.jpg"></a></li>' });
+    if (u === 'https://www.fullhdfilmizlesene.now/film/fight-club-izle/') return response({ text: `<script>var scx = ${scx};</script>` });
+    return response({ ok: false });
+  });
+  const streams = await provider.getStreams(550, 'movie', null, null);
+  assert.equal(streams.length, 1);
+  assert.equal(streams[0].url, 'https://cdn.example/fullhd/embed');
+});
+
+test('FullHDFilmizlesene provider refuses TV entries', async () => {
+  const provider = await loadProvider('providers/castsinema-fullhdfilmizlesene.js', async () => {
+    return response({ ok: false });
+  });
+  const streams = await provider.getStreams(1399, 'tv', 2, 3);
+  assert.deepEqual(Array.from(streams), []);
+});
+

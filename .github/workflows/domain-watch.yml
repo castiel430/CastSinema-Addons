@@ -1,0 +1,59 @@
+name: Domain watchdog
+
+# Scans every provider for a moved domain, runs the provider against the live
+# site and reports the result. With --fix it rewrites the host constant when a
+# working domain is found.
+
+on:
+  workflow_dispatch:
+    inputs:
+      fix:
+        description: "Rewrite provider host constants when a domain moved"
+        type: boolean
+        default: false
+  schedule:
+    - cron: '23 */6 * * *'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: domain-watch
+  cancel-in-progress: true
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r tools/requirements.txt
+
+      - name: Scan domains and test providers
+        run: python tools/domain_watch.py ${{ inputs.fix && '--fix' || '' }}
+
+      - name: Commit host updates
+        if: ${{ inputs.fix }}
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No domain changes"
+            exit 0
+          fi
+          git config user.name "domain-watch-bot"
+          git config user.email "domain-watch-bot@users.noreply.github.com"
+          git add -A
+          git commit -m "chore: update provider hosts after domain scan"
+          git push
