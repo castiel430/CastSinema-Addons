@@ -117,6 +117,62 @@ function extractFirstLink(jsonText, host) {
 
 var TRAILER_HOST = /youtube\.com|youtu\.be|dailymotion\.com|vimeo\.com/i;
 
+function isPlayableUrl(u) {
+  if (!u) return false;
+  var s = String(u);
+  if (!/^https?:\/\//i.test(s)) return false;
+  return /\.m3u8(\?|$)/i.test(s) || /\.mp4(\?|$)/i.test(s) || /\/hls\/|playlist\.m3u8|master\.m3u8/i.test(s);
+}
+function guessFormat(u) { return /\.mp4(\?|$)/i.test(String(u || "")) ? "mp4" : "m3u8"; }
+function originOf(u) { var m = String(u || "").match(/^(https?:\/\/[^\/]+)/i); return m ? m[1] : ""; }
+function extractMediaFromHtml(html, baseUrl) {
+  var text = String(html || "").replace(/\\\//g, "/");
+  var found = [], seen = {};
+  function push(u) {
+    if (!u) return;
+    var v = String(u).replace(/&amp;/g, "&").replace(/\\u0026/g, "&").trim();
+    if (!isPlayableUrl(v) || seen[v]) return;
+    seen[v] = true;
+    found.push(v);
+  }
+  var m, re = /(https?:\/\/[^\s"'<>\\]+(?:\.m3u8|\.mp4|\/master\.m3u8|\/playlist\.m3u8)[^\s"'<>\\]*)/gi;
+  while ((m = re.exec(text))) push(m[1]);
+  var patterns = [/file\s*:\s*["']([^"']+)["']/gi,/source\s*:\s*["']([^"']+)["']/gi,/src\s*:\s*["']([^"']+)["']/gi,/"file"\s*:\s*"([^"]+)"/gi,/"url"\s*:\s*"([^"]+)"/gi,/"hls"\s*:\s*"([^"]+)"/gi];
+  for (var i = 0; i < patterns.length; i++) {
+    re = patterns[i];
+    while ((m = re.exec(text))) {
+      var val = m[1];
+      if (val && val.charAt(0) === "/" && /^https?:\/\//i.test(baseUrl || "")) {
+        var o = originOf(baseUrl); if (o) val = o + val;
+      }
+      push(val);
+    }
+  }
+  return found;
+}
+function resolvePlayable(url, referer, depth) {
+  if (depth == null) depth = 0;
+  if (!url) return Promise.resolve([]);
+  if (isPlayableUrl(url)) return Promise.resolve([url]);
+  if (depth > 1) return Promise.resolve([]);
+  return netFetch(url, { headers: { "User-Agent": UA, "Accept": "text/html,application/xhtml+xml,*/*", "Referer": referer || "" } })
+    .then(function (r) { return r && r.ok ? r.text() : ""; })
+    .then(function (body) {
+      if (!body) return [];
+      var found = extractMediaFromHtml(body, url);
+      if (!found.length && depth < 1) {
+        var iframe = /<iframe[^>]+(?:data-src|src)=["']([^"']+)["']/i.exec(body);
+        if (iframe && iframe[1]) {
+          var next = iframe[1];
+          if (/^\/\//.test(next)) next = "https:" + next;
+          else if (next.charAt(0) === "/") { var o2 = originOf(url); if (o2) next = o2 + next; }
+          if (/^https?:\/\//i.test(next) && next !== url) return resolvePlayable(next, url, depth + 1);
+        }
+      }
+      return found;
+    }).catch(function () { return []; });
+}
+
 function findPlayer(html) {
   var tags = String(html || "").match(/<iframe\b[^>]*>/gi) || [];
   var fallback = "";
@@ -164,17 +220,27 @@ function getStreams(tmdbId, mediaType, season, episode) {
           if (!pageHtml) return trySearch(termIndex, hostIndex + 1);
           var embedUrl = findPlayer(pageHtml);
           if (!embedUrl) return trySearch(termIndex, hostIndex + 1);
-          var label = title || "İçerik";
-          if (isTv) label += " • S" + season + "E" + episode;
-          return [{
-            name: "CastSinema • HDFilmCehennemi",
-            title: "HDFilmCehennemi • " + label + " • 1080p",
-            url: embedUrl,
-            quality: 1080,
-            provider: "castsinema-hdfilmcehennemi",
-            format: "video",
-            headers: { "User-Agent": UA, "Referer": host + "/" }
-          }];
+          return resolvePlayable(embedUrl, targetUrl, 0).then(function (mediaUrls) {
+            if (!mediaUrls || !mediaUrls.length) return trySearch(termIndex, hostIndex + 1);
+            var label = title || "İçerik";
+            if (isTv) label += " • S" + season + "E" + episode;
+            var streams = [];
+            for (var i = 0; i < mediaUrls.length && streams.length < 4; i++) {
+              var murl = mediaUrls[i];
+              var fmt = guessFormat(murl);
+              streams.push({
+                name: "CastSinema • HDFilmCehennemi",
+                title: "HDFilmCehennemi • " + label + (fmt === "m3u8" ? " • HLS" : " • MP4"),
+                url: murl,
+                quality: 1080,
+                provider: "castsinema-hdfilmcehennemi",
+                format: fmt,
+                headers: { "User-Agent": UA, "Referer": embedUrl, "Origin": originOf(embedUrl) },
+                behaviorHints: { notWebReady: true, proxyHeaders: { request: { "User-Agent": UA, "Referer": embedUrl, "Origin": originOf(embedUrl) } } }
+              });
+            }
+            return streams.length ? streams : trySearch(termIndex, hostIndex + 1);
+          });
         });
       }).catch(function () { return trySearch(termIndex, hostIndex + 1); });
     }

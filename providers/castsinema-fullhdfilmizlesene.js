@@ -119,6 +119,62 @@ function decodeBase64(value) {
 
 // "v2." values are reversed, base64url encoded and XOR masked with the
 // hostname. Plain values are ROT13 + base64.
+function isPlayableUrl(u) {
+  if (!u) return false;
+  var s = String(u);
+  if (!/^https?:\/\//i.test(s)) return false;
+  return /\.m3u8(\?|$)/i.test(s) || /\.mp4(\?|$)/i.test(s) || /\/hls\/|playlist\.m3u8|master\.m3u8/i.test(s);
+}
+function guessFormat(u) { return /\.mp4(\?|$)/i.test(String(u || "")) ? "mp4" : "m3u8"; }
+function originOf(u) { var m = String(u || "").match(/^(https?:\/\/[^\/]+)/i); return m ? m[1] : ""; }
+function extractMediaFromHtml(html, baseUrl) {
+  var text = String(html || "").replace(/\\\//g, "/");
+  var found = [], seen = {};
+  function push(u) {
+    if (!u) return;
+    var v = String(u).replace(/&amp;/g, "&").replace(/\\u0026/g, "&").trim();
+    if (!isPlayableUrl(v) || seen[v]) return;
+    seen[v] = true;
+    found.push(v);
+  }
+  var m, re = /(https?:\/\/[^\s"'<>\\]+(?:\.m3u8|\.mp4|\/master\.m3u8|\/playlist\.m3u8)[^\s"'<>\\]*)/gi;
+  while ((m = re.exec(text))) push(m[1]);
+  var patterns = [/file\s*:\s*["']([^"']+)["']/gi,/source\s*:\s*["']([^"']+)["']/gi,/src\s*:\s*["']([^"']+)["']/gi,/"file"\s*:\s*"([^"]+)"/gi,/"url"\s*:\s*"([^"]+)"/gi,/"hls"\s*:\s*"([^"]+)"/gi];
+  for (var i = 0; i < patterns.length; i++) {
+    re = patterns[i];
+    while ((m = re.exec(text))) {
+      var val = m[1];
+      if (val && val.charAt(0) === "/" && /^https?:\/\//i.test(baseUrl || "")) {
+        var o = originOf(baseUrl); if (o) val = o + val;
+      }
+      push(val);
+    }
+  }
+  return found;
+}
+function resolvePlayable(url, referer, depth) {
+  if (depth == null) depth = 0;
+  if (!url) return Promise.resolve([]);
+  if (isPlayableUrl(url)) return Promise.resolve([url]);
+  if (depth > 1) return Promise.resolve([]);
+  return netFetch(url, { headers: { "User-Agent": UA, "Accept": "text/html,application/xhtml+xml,*/*", "Referer": referer || "" } })
+    .then(function (r) { return r && r.ok ? r.text() : ""; })
+    .then(function (body) {
+      if (!body) return [];
+      var found = extractMediaFromHtml(body, url);
+      if (!found.length && depth < 1) {
+        var iframe = /<iframe[^>]+(?:data-src|src)=["']([^"']+)["']/i.exec(body);
+        if (iframe && iframe[1]) {
+          var next = iframe[1];
+          if (/^\/\//.test(next)) next = "https:" + next;
+          else if (next.charAt(0) === "/") { var o2 = originOf(url); if (o2) next = o2 + next; }
+          if (/^https?:\/\//i.test(next) && next !== url) return resolvePlayable(next, url, depth + 1);
+        }
+      }
+      return found;
+    }).catch(function () { return []; });
+}
+
 function decodeSource(value, host) {
   var text = String(value || "");
   if (!text) return "";
@@ -287,22 +343,46 @@ function getStreams(tmdbId, mediaType, season, episode) {
         if (!pageHtml) return [];
         var sources = parseSources(pageHtml, ctx.host);
         var seen = {};
-        var streams = [];
+        var tasks = [];
         for (var i = 0; i < sources.length; i++) {
-          var source = sources[i];
-          if (!source.url || seen[source.url]) continue;
-          seen[source.url] = true;
-          streams.push({
-            name: "CastSinema • FullHDFilmizlesene",
-            title: "FullHDFilmizlesene • " + (ctx.title || "Film") + " • " + (source.source || "Kaynak") + " • 1080p",
-            url: source.url,
-            quality: 1080,
-            provider: "castsinema-fullhdfilmizlesene",
-            format: "video",
-            headers: { "User-Agent": UA, "Referer": ctx.host + "/" }
-          });
+          (function (source) {
+            if (!source || !source.url || seen[source.url]) return;
+            seen[source.url] = true;
+            tasks.push(resolvePlayable(source.url, itemUrl, 0).then(function (mediaUrls) {
+              var urls = (mediaUrls && mediaUrls.length) ? mediaUrls : [];
+              // if resolver couldn't extract but URL already playable-like was handled; if still empty, skip unplayable embed
+              var out = [];
+              for (var j = 0; j < urls.length && j < 2; j++) {
+                var murl = urls[j];
+                var fmt = guessFormat(murl);
+                out.push({
+                  name: "CastSinema • FullHDFilmizlesene",
+                  title: "FullHDFilmizlesene • " + (ctx.title || "Film") + " • " + (source.source || "Kaynak") + (fmt === "m3u8" ? " • HLS" : " • MP4"),
+                  url: murl,
+                  quality: 1080,
+                  provider: "castsinema-fullhdfilmizlesene",
+                  format: fmt,
+                  headers: { "User-Agent": UA, "Referer": source.url, "Origin": originOf(source.url) || ctx.host },
+                  behaviorHints: { notWebReady: true, proxyHeaders: { request: { "User-Agent": UA, "Referer": source.url } } }
+                });
+              }
+              return out;
+            }).catch(function () { return []; }));
+          })(sources[i]);
         }
-        return streams;
+        return Promise.all(tasks).then(function (lists) {
+          var flat = [];
+          var dedupe = {};
+          for (var k = 0; k < lists.length; k++) {
+            var list = lists[k] || [];
+            for (var m = 0; m < list.length; m++) {
+              if (!list[m] || dedupe[list[m].url]) continue;
+              dedupe[list[m].url] = true;
+              flat.push(list[m]);
+            }
+          }
+          return flat;
+        });
       });
   })
     .catch(function (error) {
