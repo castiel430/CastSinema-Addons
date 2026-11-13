@@ -1,7 +1,7 @@
 {
   "name": "CastSinema",
   "id": "castsinema",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "scrapers": [
     {
       "id": "castsinema-boxfilm",
@@ -333,6 +333,79 @@
       "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",
       "contentLanguage": [
         "tr"
+      ],
+      "formats": [
+        "m3u8"
+      ],
+      "limited": false,
+      "disabledPlatforms": [],
+      "supportsExternalPlayer": true
+    },
+    {
+      "id": "castsinema-dizibal",
+      "name": "CastSinema • DiziBal",
+      "description": "DiziBal altyazili yabanci dizi/film arsivi; pilavyer HLS akisi ve altyazilar.",
+      "version": "1.0.0",
+      "author": "CastSinema",
+      "supportedTypes": [
+        "movie",
+        "tv"
+      ],
+      "filename": "providers/castsinema-dizibal.js",
+      "enabled": true,
+      "hasSettings": false,
+      "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",
+      "contentLanguage": [
+        "tr",
+        "en"
+      ],
+      "formats": [
+        "m3u8"
+      ],
+      "limited": false,
+      "disabledPlatforms": [],
+      "supportsExternalPlayer": true
+    },
+    {
+      "id": "castsinema-dizipod",
+      "name": "CastSinema • DiziPod",
+      "description": "DiziPod Turkce altyazili yabanci dizi arsivi (HLS).",
+      "version": "1.0.0",
+      "author": "CastSinema",
+      "supportedTypes": [
+        "tv"
+      ],
+      "filename": "providers/castsinema-dizipod.js",
+      "enabled": true,
+      "hasSettings": false,
+      "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",
+      "contentLanguage": [
+        "tr"
+      ],
+      "formats": [
+        "m3u8"
+      ],
+      "limited": false,
+      "disabledPlatforms": [],
+      "supportsExternalPlayer": true
+    },
+    {
+      "id": "castsinema-diziyou",
+      "name": "CastSinema • DiziYou",
+      "description": "DiziYou dizi/film kaynaklari (HLS + altyazi).",
+      "version": "1.0.0",
+      "author": "CastSinema",
+      "supportedTypes": [
+        "movie",
+        "tv"
+      ],
+      "filename": "providers/castsinema-diziyou.js",
+      "enabled": true,
+      "hasSettings": false,
+      "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",
+      "contentLanguage": [
+        "tr",
+        "en"
       ],
       "formats": [
         "m3u8"

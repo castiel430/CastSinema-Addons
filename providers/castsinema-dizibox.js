@@ -1,7 +1,16 @@
 /* SPDX-License-Identifier: MIT
  * CastSinema DiziBox provider.
- * Turkish series scraper for DiziBox.
- * Logic learned from Wiojelt/Nuvio-Addons and rewritten for CastSinema.
+ * Turkish series scraper for DiziBox (dizibox.live).
+ *
+ * Verified flow (live site, 2026-11):
+ *   TMDB id -> title
+ *   -> GET /search/<title>/  -> series page (detailed-article cards)
+ *   -> season-episode links -> episode page
+ *   -> video-area iframe -> king.php?wmode=opaque&v=... -> Player iframe
+ *   -> /embed/sheila/... (answers only with a Referer) -> HLS master
+ *
+ * Flow logic follows the working reference implementation published in the
+ * BigBull CS Nuvio addon (MIT); rewritten for the CastSinema runtime.
  */
 "use strict";
 
@@ -10,34 +19,32 @@ var TMDB_API = "https://api.themoviedb.org/3";
 var TMDB_KEY = "4e44d9029b1270a757cddc766a1bcb63";
 var UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36";
 
-function profileHeaders(ua) {
-  return { "User-Agent": ua, "Accept-Language": "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7" };
-}
 function requestProfiles() {
   return [
-    profileHeaders("Dalvik/2.1.0 (Linux; U; Android 13; SM-G998B Build/TP1A.220624.014)"),
-    profileHeaders("okhttp/4.9.2"),
-    profileHeaders("ExoPlayerLib/2.19.1"),
-    profileHeaders("stagefright/1.2 (Linux;Android 11)"),
-    profileHeaders("VLC/3.0.21 LibVLC/3.0.21"),
-    profileHeaders("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"),
-    profileHeaders("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"),
-    profileHeaders("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 Edg/139.0.0.0"),
-    profileHeaders("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.2 Safari/605.1.15"),
+    { "User-Agent": UA, "Accept-Language": "tr-TR,tr;q=0.9" },
+    { "User-Agent": "okhttp/4.9.2" },
+    { "User-Agent": "ExoPlayerLib/2.19.1" },
+    { "User-Agent": "stagefright/1.2 (Linux;Android 11)" },
+    { "User-Agent": "VLC/3.0.21 LibVLC/3.0.21" },
+    { "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 13; SM-G998B Build/TP1A.220624.014)" },
     {}
   ];
 }
-var KEEP_HEADERS = ["accept", "referer", "origin", "range", "cookie", "content-type", "x-requested-with"];
+var KEEP_HEADERS = ["accept", "referer", "origin", "range", "cookie", "content-type"];
 function mergeHeaders(base, profile) {
   var headers = {}, key;
-  for (key in base) { if (Object.prototype.hasOwnProperty.call(base, key) && KEEP_HEADERS.indexOf(key) !== -1) headers[key] = base[key]; }
+  for (key in base) {
+    if (!Object.prototype.hasOwnProperty.call(base, key)) continue;
+    if (KEEP_HEADERS.indexOf(String(key).toLowerCase()) === -1) continue;
+    headers[key] = base[key];
+  }
   for (key in profile) { if (Object.prototype.hasOwnProperty.call(profile, key)) headers[key] = profile[key]; }
   return headers;
 }
 function isRefused(response) {
   if (!response) return true;
   if (typeof response.status !== "number") return false;
-  return response.status === 403 || response.status === 503;
+  return response.status === 403 || response.status === 404 || response.status === 429 || response.status === 503;
 }
 function netFetch(url, options) {
   options = options || {};
@@ -59,291 +66,174 @@ function netFetch(url, options) {
   }
   return next();
 }
-
-function getJson(url, headers) {
-  return netFetch(url, { headers: headers || { "User-Agent": UA, "Accept": "application/json" } })
-    .then(function (r) { return r.ok ? r.json() : null; })
-    .catch(function () { return null; });
-}
-function getText(url, referer, extraHeaders) {
-  var headers = { "User-Agent": UA, "Accept": "text/html,application/xhtml+xml,*/*" };
-  if (referer) headers.Referer = referer;
-  if (extraHeaders) {
-    for (var k in extraHeaders) { if (Object.prototype.hasOwnProperty.call(extraHeaders, k)) headers[k] = extraHeaders[k]; }
-  }
-  return netFetch(url, { headers: headers })
-    .then(function (r) { return r.ok ? r.text() : ""; })
+function getText(url, headers) {
+  return netFetch(url, { headers: headers || { "User-Agent": UA, "Accept": "text/html,application/xhtml+xml,*/*" } })
+    .then(function (r) { return r && r.ok ? r.text() : ""; })
     .catch(function () { return ""; });
 }
-
-function norm(s) { return String(s || "").toLowerCase().replace(/[^a-z0-9\u00C0-\u024F]+/gi, " ").trim(); }
-function slugify(s) {
-  return String(s || "").toLowerCase()
-    .replace(/ı/g, "i").replace(/ğ/g, "g").replace(/ü/g, "u").replace(/ş/g, "s").replace(/ö/g, "o").replace(/ç/g, "c")
-    .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-}
-function abs(url, base) {
-  if (!url) return "";
-  if (/^https?:\/\//i.test(url)) return url;
-  if (url.indexOf("//") === 0) return "https:" + url;
-  if (url.charAt(0) === "/") return (base ? base.replace(/^(https?:\/\/[^/]+).*$/i, "$1") : HOST) + url;
-  return (base ? base.replace(/\/[^/]*$/, "/") : HOST + "/") + url;
+function getJson(url, headers) {
+  return netFetch(url, { headers: headers || { "User-Agent": UA, "Accept": "application/json" } })
+    .then(function (r) { return r && r.ok ? r.json() : null; })
+    .catch(function () { return null; });
 }
 
-function getTvInfo(tmdbId) {
-  return getJson(TMDB_API + "/tv/" + encodeURIComponent(String(tmdbId)) + "?api_key=" + TMDB_KEY + "&language=tr-TR&append_to_response=external_ids", { "User-Agent": UA, "Accept": "application/json" });
+function abs(base, href) {
+  if (!href) return "";
+  var v = String(href).trim();
+  if (/^https?:/i.test(v)) return v;
+  var origin = /^(https?:\/\/[^/]+)/.exec(base);
+  if (v.charAt(0) === "/") return origin ? origin[1] + v : v;
+  return String(base).replace(/[^/]*$/, "") + v;
+}
+function norm(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[ıI]/g, "i").replace(/[şS]/g, "s").replace(/[ğG]/g, "g")
+    .replace(/[üÜ]/g, "u").replace(/[öÖ]/g, "o").replace(/[çÇ]/g, "c")
+    .replace(/[^a-z0-9]+/g, " ").trim();
+}
+function sameTitle(have, want) {
+  var a = norm(have), b = norm(want);
+  if (!b) return false;
+  return a === b || a.indexOf(b + " ") === 0 || b.indexOf(a + " ") === 0;
+}
+function first(pattern, body) {
+  var m = pattern.exec(String(body || ""));
+  return m ? m[1] : null;
 }
 
-function parseDirectory(html) {
-  var text = String(html || "");
-  var items = [];
-  var re = /<a[^>]+href=["'](https?:\/\/www\.dizibox\.live\/diziler\/[^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
-  var m;
-  var seen = {};
-  while ((m = re.exec(text)) !== null) {
-    var href = m[1];
-    if (seen[href]) continue;
-    seen[href] = true;
-    var inner = m[2];
-    var title = inner.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
-    if (!title) continue;
-    var slug = href.replace(/^.*\/diziler\/([^\/?#]+).*$/i, "$1");
-    items.push({ url: href, title: title, slug: slug });
+function getMediaInfo(tmdbId) {
+  return getJson(TMDB_API + "/tv/" + encodeURIComponent(String(tmdbId)) + "?api_key=" + TMDB_KEY + "&language=tr-TR&append_to_response=external_ids,translations");
+}
+
+function collectTitles(info) {
+  var titles = [];
+  function add(v) {
+    var s = String(v || "").trim();
+    if (!s) return;
+    for (var i = 0; i < titles.length; i++) if (norm(titles[i]) === norm(s)) return;
+    titles.push(s);
   }
-  return items;
-}
-
-function scoreMatch(item, meta) {
-  var it = norm(item.title);
-  var names = [];
-  if (meta.name) names.push(norm(meta.name));
-  if (meta.original_name) names.push(norm(meta.original_name));
-  var score = 0;
-  for (var i = 0; i < names.length; i++) {
-    var n = names[i];
-    if (!n) continue;
-    if (it === n) score = Math.max(score, 100);
-    else if (it.indexOf(n) !== -1 || n.indexOf(it) !== -1) score = Math.max(score, 70);
-    else {
-      var nt = n.split(" ").filter(Boolean);
-      var hit = 0;
-      for (var j = 0; j < nt.length; j++) if (it.indexOf(nt[j]) !== -1) hit++;
-      if (nt.length && hit >= Math.max(1, Math.ceil(nt.length * 0.6))) score = Math.max(score, 40 + hit);
-    }
+  if (!info) return titles;
+  add(info.name);
+  add(info.original_name);
+  var tr = (info.translations && info.translations.translations) || [];
+  for (var i = 0; i < tr.length; i++) {
+    if (!tr[i] || tr[i].iso_639_1 !== "tr") continue;
+    add(tr[i].data && tr[i].data.name);
   }
-  var slug = norm(item.slug.replace(/-izle.*$/i, "").replace(/-/g, " "));
-  for (var k = 0; k < names.length; k++) {
-    if (names[k] && slug && (slug === names[k] || slug.indexOf(names[k]) !== -1 || names[k].indexOf(slug) !== -1)) score = Math.max(score, 60);
-  }
-  return score;
+  return titles;
 }
 
-function findSeriesUrl(meta) {
-  var queries = [];
-  if (meta && meta.name) queries.push(meta.name);
-  if (meta && meta.original_name && meta.original_name !== meta.name) queries.push(meta.original_name);
-
-  function trySearchApi(i) {
-    if (i >= queries.length) return Promise.resolve(null);
-    var q = queries[i];
-    return getJson(HOST + "/ara?q=" + encodeURIComponent(q), { "User-Agent": UA, "Accept": "application/json", "X-Requested-With": "XMLHttpRequest", "Referer": HOST + "/" })
-      .then(function (data) {
-        if (Array.isArray(data) && data.length) {
-          var imdb = meta && meta.external_ids ? meta.external_ids.imdb_id : null;
-          if (imdb) {
-            for (var j = 0; j < data.length; j++) {
-              var poster = String((data[j] && data[j].poster_url) || "");
-              if (poster.indexOf(imdb) !== -1 && data[j].slug) return HOST + "/diziler/" + data[j].slug + "/";
-            }
-          }
-          for (var k = 0; k < data.length; k++) {
-            if (data[k] && data[k].slug) return HOST + "/diziler/" + data[k].slug + "/";
-          }
-        }
-        return trySearchApi(i + 1);
-      }).catch(function () { return trySearchApi(i + 1); });
-  }
-
-  return trySearchApi(0).then(function (found) {
-    if (found) return found;
-    return getText(HOST + "/", HOST + "/").then(function (html) {
-      var items = parseDirectory(html);
-      if (!items.length) return null;
-      var best = null, bestScore = -1;
-      for (var i = 0; i < items.length; i++) {
-        var sc = scoreMatch(items[i], meta || {});
-        if (sc > bestScore) { bestScore = sc; best = items[i]; }
-      }
-      if (best && bestScore >= 40) return best.url;
-      // last resort: guess slug
-      var slug = slugify((meta && (meta.name || meta.original_name)) || "");
-      return slug ? (HOST + "/diziler/" + slug + "/") : null;
-    });
-  });
-}
-
-function findEpisodeUrl(seriesHtml, seriesUrl, season, episode) {
-  var html = String(seriesHtml || "");
-  var seriesSlug = seriesUrl.replace(/^.*\/diziler\/([^\/?#]+).*$/i, "$1");
-  var s = String(season), e = String(episode);
-  // direct episode link pattern: /slug-S-sezon-E-bolum-...
-  var re1 = new RegExp('href=["\']([^"\']*' + seriesSlug.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&") + '-' + s + '-sezon-' + e + '-bolum[^"\']*)["\']', 'i');
-  var m = re1.exec(html);
-  if (m) return abs(m[1], seriesUrl);
-  // generic pattern
-  var re2 = new RegExp('href=["\']([^"\']*-' + s + '-sezon-' + e + '-bolum[^"\']*)["\']', 'i');
-  m = re2.exec(html);
-  if (m) return abs(m[1], seriesUrl);
-  // season page link
-  var reSeason = new RegExp('href=["\']([^"\']*' + seriesSlug.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&") + '-sezon-' + s + '[^"\']*|/sezon/' + s + '[^"\']*)["\']', 'i');
-  m = reSeason.exec(html);
-  if (m) return { seasonUrl: abs(m[1], seriesUrl) };
-  return null;
-}
-
-function extractPlayerCandidates(html, pageUrl) {
-  var text = String(html || "");
+function episodeLinks(html) {
   var out = [];
-  var seen = {};
-  function add(u) {
-    if (!u) return;
-    u = abs(u, pageUrl);
-    if (!/^https?:\/\//i.test(u)) return;
-    if (seen[u]) return;
-    seen[u] = true;
-    out.push(u);
-  }
-  var reIframe = /<iframe[^>]+(?:src|data-src)=["']([^"']+)["']/gi;
+  var re = /href=["']([^"']+)["'][^>]*class=["'][^"']*season-episode[^"']*["']/g;
   var m;
-  while ((m = reIframe.exec(text)) !== null) add(m[1]);
-  // select options (woca-linkpages etc.)
-  var reOpt = /<(?:option|a)[^>]+(?:value|href|data-src|data-url)=["']([^"']+)["'][^>]*>/gi;
-  while ((m = reOpt.exec(text)) !== null) {
-    var v = m[1];
-    if (/king\.php|moly|haydi\.php|player\.php|\/player\/|\/embed\/|molystream/i.test(v)) add(v);
+  while ((m = re.exec(String(html || ""))) !== null) {
+    var url = abs(HOST, m[1]);
+    if (out.indexOf(url) === -1) out.push(url);
   }
-  // script sources
-  var reUrl = /https?:\/\/[^\s"'\\<>]+(?:king\.php|moly\.php|haydi\.php|player\.php|\/embed\/|molystream)[^\s"'\\<>]*/gi;
-  while ((m = reUrl.exec(text)) !== null) add(m[0]);
   return out;
 }
 
-function extractM3u8(text) {
-  var s = String(text || "");
-  var urls = [];
-  var re = /https?:\/\/[^\s"'\\<>]+\.m3u8[^\s"'\\<>]*/gi;
-  var m;
-  while ((m = re.exec(s)) !== null) urls.push(m[0].replace(/\\\//g, "/"));
-  return urls;
+function findEpisode(list, season, episode) {
+  var exact = new RegExp("-" + season + "-sezon-" + episode + "-bolum");
+  for (var i = 0; i < list.length; i++) if (exact.test(list[i])) return list[i];
+  return "";
 }
 
-function resolvePlayer(url, referer, depth, visited) {
-  if (!url || depth > 4) return Promise.resolve([]);
-  if (visited[url]) return Promise.resolve([]);
-  visited[url] = true;
-  var headers = { "User-Agent": UA, "Referer": referer || HOST + "/", "Accept": "*/*" };
-  try {
-    var uo = new URL(url);
-    headers.Origin = uo.origin;
-  } catch (_) {}
-  return netFetch(url, { headers: headers }).then(function (r) { return r.ok ? r.text() : ""; }).then(function (body) {
-    if (!body) return [];
-    var trimmed = body.trim();
-    if (/^#EXTM3U/.test(trimmed)) return [{ url: url, referer: referer }];
-    var m3u8s = extractM3u8(body);
-    if (m3u8s.length) {
-      // if body is m3u8 content fetched from non-m3u8 url, treat as playlist; else direct urls
-      return m3u8s.map(function (u) { return { url: u, referer: url }; });
-    }
-    // follow iframes/chain
-    var candidates = extractPlayerCandidates(body, url);
-    // also try to find sources in scripts (file:"...")
-    var reFile = /(?:file|source|src)\s*[:=]\s*["'](https?:[^"']+)["']/gi;
-    var m;
-    while ((m = reFile.exec(body)) !== null) {
-      var f = m[1].replace(/\\\//g, "/");
-      if (/\.m3u8/i.test(f)) return [{ url: f, referer: url }];
-      candidates.push(f);
-    }
-    var chain = Promise.resolve([]);
-    var filtered = [];
-    for (var i = 0; i < candidates.length && filtered.length < 4; i++) {
-      if (!visited[candidates[i]]) filtered.push(candidates[i]);
-    }
-    function tryNext(i) {
-      if (i >= filtered.length) return Promise.resolve([]);
-      return resolvePlayer(filtered[i], url, depth + 1, visited).then(function (res) {
-        if (res && res.length) return res;
-        return tryNext(i + 1);
-      });
-    }
-    return tryNext(0);
-  }).catch(function () { return []; });
+function seasonTab(html, season) {
+  var re = new RegExp('href="([^"]*/' + season + '-sezon-[^/" ]+/)"');
+  var m = re.exec(String(html || ""));
+  return m ? abs(HOST, m[1]) : "";
 }
 
 function getStreams(tmdbId, mediaType, season, episode) {
-  if (tmdbId == null || (mediaType !== "tv" && mediaType !== "series" && mediaType !== "show")) return Promise.resolve([]);
-  var sNum = season != null ? Number(season) : 1;
-  var eNum = episode != null ? Number(episode) : 1;
-  if (!isFinite(sNum) || !isFinite(eNum)) return Promise.resolve([]);
+  if (tmdbId == null) return Promise.resolve([]);
+  var isTv = mediaType === "tv" || mediaType === "series" || mediaType === "show";
+  if (!isTv) return Promise.resolve([]);
+  var want = season != null ? Number(season) : 1;
+  var wantEp = episode != null ? Number(episode) : 1;
 
-  return getTvInfo(tmdbId).then(function (info) {
-    if (!info) info = {};
-    return findSeriesUrl(info).then(function (seriesUrl) {
-      if (!seriesUrl) return [];
-      return getText(seriesUrl, HOST + "/").then(function (seriesHtml) {
-        if (!seriesHtml) return [];
-        var ep = findEpisodeUrl(seriesHtml, seriesUrl, sNum, eNum);
-        function fetchEpisodePage(targetUrl, referer) {
-          return getText(targetUrl, referer).then(function (epHtml) {
-            if (!epHtml) return [];
-            var candidates = extractPlayerCandidates(epHtml, targetUrl);
-            if (!candidates.length) return [];
-            var visited = {};
-            function tryCandidate(i) {
-              if (i >= candidates.length || i >= 5) return Promise.resolve([]);
-              return resolvePlayer(candidates[i], targetUrl, 0, visited).then(function (found) {
-                if (found && found.length) {
-                  var title = (info.name || info.original_name || "Dizi") + " • S" + sNum + "E" + eNum;
-                  var streams = [];
-                  var seenUrl = {};
-                  for (var j = 0; j < found.length && streams.length < 3; j++) {
-                    var u = found[j].url;
-                    if (!u || seenUrl[u]) continue;
-                    seenUrl[u] = true;
-                    streams.push({
-                      name: "CastSinema • DiziBox",
-                      title: "DiziBox • " + title + " • 1080p",
-                      url: u,
-                      quality: 1080,
-                      provider: "castsinema-dizibox",
-                      format: "m3u8",
-                      headers: { "User-Agent": UA, "Referer": found[j].referer || targetUrl }
-                    });
-                  }
-                  return streams;
-                }
-                return tryCandidate(i + 1);
-              });
-            }
-            return tryCandidate(0);
-          });
-        }
+  var candidates = [];
+  var episodeUrl = "";
 
-        if (ep && typeof ep === "string") {
-          return fetchEpisodePage(ep, seriesUrl);
-        }
-        if (ep && ep.seasonUrl) {
-          return getText(ep.seasonUrl, seriesUrl).then(function (seasonHtml) {
-            var ep2 = findEpisodeUrl(seasonHtml || "", seriesUrl, sNum, eNum);
-            if (ep2 && typeof ep2 === "string") return fetchEpisodePage(ep2, ep.seasonUrl);
-            return [];
-          });
-        }
-        // fallback: try common episode URL formats
-        var slug = seriesUrl.replace(/^.*\/diziler\/([^\/?#]+).*$/i, "$1");
-        var guess = HOST + "/" + slug + "-" + sNum + "-sezon-" + eNum + "-bolum-izle/";
-        return fetchEpisodePage(guess, seriesUrl);
+  return getMediaInfo(tmdbId).then(function (info) {
+    var titles = collectTitles(info);
+    if (!titles.length) return null;
+    var chain = Promise.resolve(null);
+    for (var i = 0; i < titles.length && i < 2; i++) {
+      (function (title) {
+        chain = chain.then(function (found) {
+          if (found) return found;
+          return getText(HOST + "/search/" + encodeURIComponent(title).replace(/%20/g, "+") + "/", { "User-Agent": UA, "Accept": "text/html,application/xhtml+xml,*/*", "Referer": HOST + "/" })
+            .then(function (html) {
+              if (!html) return null;
+              var re = /<article class="detailed-article"[\s\S]*?<h3[^>]*><a href="([^"]+)"[^>]*>([^<]*)/g;
+              var m;
+              while ((m = re.exec(html)) !== null && candidates.length < 3) {
+                if (sameTitle(m[2], title)) candidates.push(abs(HOST, m[1]));
+              }
+              return null;
+            });
+        });
+      })(titles[i]);
+    }
+    return chain.then(function () { return titles[0]; });
+  }).then(function (title) {
+    if (!title) return null;
+
+    function fromSeries(i) {
+      if (i >= candidates.length) return Promise.resolve(null);
+      return getText(candidates[i], { "User-Agent": UA, "Accept": "text/html,application/xhtml+xml,*/*", "Referer": HOST + "/" }).then(function (detail) {
+        if (!detail) return fromSeries(i + 1);
+        var hit = findEpisode(episodeLinks(detail), want, wantEp);
+        if (hit) return hit;
+        var tab = seasonTab(detail, want);
+        if (!tab) return fromSeries(i + 1);
+        return getText(tab, { "User-Agent": UA, "Accept": "text/html,application/xhtml+xml,*/*", "Referer": candidates[i] }).then(function (seasonHtml) {
+          return findEpisode(episodeLinks(seasonHtml), want, wantEp) || fromSeries(i + 1);
+        }).catch(function () { return fromSeries(i + 1); });
+      }).catch(function () { return fromSeries(i + 1); });
+    }
+
+    return fromSeries(0);
+  }).then(function (ep) {
+    if (!ep) return [];
+    episodeUrl = ep;
+    return getText(ep, { "User-Agent": UA, "Accept": "text/html,application/xhtml+xml,*/*", "Referer": HOST + "/" });
+  }).then(function (page) {
+    if (!page) return [];
+    var src = first(/id="video-area"[\s\S]*?<iframe[^>]+src="([^"]+)"/, page);
+    if (!src) return [];
+    var player = abs(episodeUrl, src);
+    if (player.indexOf("king.php") === -1) return [];
+    return getText(player.replace("king.php?v=", "king.php?wmode=opaque&v="), { "User-Agent": UA, "Accept": "text/html,application/xhtml+xml,*/*", "Referer": episodeUrl });
+  }).then(function (king) {
+    if (!king) return [];
+    var src = first(/id="Player"[\s\S]*?<iframe[^>]+src="([^"]+)"/, king);
+    if (!src) return [];
+    var embedUrl = abs(episodeUrl, src);
+    var stream = embedUrl.replace("/embed/", "/embed/sheila/");
+    if (stream === embedUrl) return [];
+    var headers = { "User-Agent": UA, "Referer": embedUrl, "Accept": "*/*" };
+    return netFetch(stream, { headers: headers }).then(function (r) {
+      if (!r || !r.ok) return [];
+      return r.text().then(function (playlist) {
+        if (playlist.indexOf("#EXTM3U") === -1) return [];
+        var height = first(/RESOLUTION=\d+x(\d+)/, playlist);
+        var quality = height ? height + "p" : "auto";
+        return [{
+          name: "CastSinema • DiziBox",
+          title: "DiziBox • " + quality + " • HLS",
+          url: stream,
+          quality: 1080,
+          provider: "castsinema-dizibox",
+          format: "m3u8",
+          headers: headers,
+          behaviorHints: { notWebReady: true, proxyHeaders: { request: headers } },
+          subtitles: []
+        }];
       });
     });
   }).catch(function (error) {

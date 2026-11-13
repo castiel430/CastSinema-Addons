@@ -278,6 +278,13 @@ function findEpisodePage(content, season, episode) {
   var html = String(content.html || "");
   var s = String(season), e = String(episode);
   if (new RegExp("-" + s + "-sezon-" + e + "-bolum", "i").test(url)) return Promise.resolve({ url: url, html: html });
+  var re0 = new RegExp("https?://[^\"'\\\\s]*?-" + s + "-sezon-" + e + "-bolum[^\"'\\\\s]*", "i");
+  var m0 = re0.exec(html);
+  if (m0) {
+    var epUrl0 = m0[0].replace(/\\/g, "").replace(/[,;)]+$/, "");
+    return getText(epUrl0, { "User-Agent": UA_SITE, "Accept": "text/html,application/xhtml+xml,*/*", "Referer": url })
+      .then(function (epHtml) { return epHtml ? { url: epUrl0, html: epHtml } : null; });
+  }
   var re = new RegExp("href=[\"']([^\"']*-" + s + "-sezon-" + e + "-bolum[^\"']*)[\"']", "i");
   var m = re.exec(html);
   if (m) {

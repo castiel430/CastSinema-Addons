@@ -58,26 +58,22 @@ test('CastSinema manifest uses the current scraper repository schema', async () 
 });
 
 test('ClipBox provider converts TMDB movie response into playable stream', async () => {
-  const calls = [];
   const provider = await loadProvider('providers/castsinema-clipbox.js', async (url) => {
-    calls.push(String(url));
-    if (String(url).includes('/movie/550')) return response({ json: { title: 'Fight Club', original_title: 'Fight Club', imdb_id: 'tt0137523' } });
-    if (String(url).includes('/api/search?q=')) {
-      return response({ json: [{ id: 42, title: 'Fight Club', slug: 'fight-club-1999', poster_url: '/uploads/posters/tt0137523-poster.webp', language_label: 'DUAL' }] });
+    const u = String(url);
+    if (u.includes('/api/movie/550')) return response({ json: { src: '/embed/170060?token=abc&t=Fight+Club&expires=9999999999&lang=en' } });
+    if (u.includes('/movie/550')) return response({ json: { title: 'Fight Club', original_title: 'Fight Club', imdb_id: 'tt0137523' } });
+    if (u.includes('/embed/170060')) {
+      return response({ text: `<script>window.masterPlaylist = { params: { 'token': 'abc', 'expires': '9999999999', 'asn': '' }, url: 'https://cdn.example/playlist/1' };</script>` });
     }
-    if (String(url).includes('/film/fight-club-1999')) {
-      const code = btoa('https://vixsrc.to/boxes/abc').split('').reverse().join('');
-      return response({ text: `<div class="box-player-preview" data-player-code="${code}"></div>` });
-    }
-    if (String(url).includes('/boxes/abc')) {
-      const f = 'https://cdn.example/video.m3u8';
-      return response({ text: `<script>jwplayer('player').setup(JSON.parse('{"file":"${f}"}'));</script>` });
+    if (u.includes('/playlist/')) {
+      return response({ text: '#EXTM3U\\n#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="Turkish",URI="https://cdn.example/sub.vtt"\\n#EXT-X-STREAM-INF:BANDWIDTH=1000000\\nhttps://cdn.example/v.m3u8', status: 200 });
     }
     return response({ ok: false });
   });
   const streams = await provider.getStreams('550', 'movie', null, null);
   assert.equal(streams.length, 1);
-  assert.ok(calls.some((c) => c.includes('/api/search?q=')));
+  assert.ok(streams[0].url.includes('/playlist/1'));
+  assert.equal(streams[0].format, 'm3u8');
 });
 
 test('ClipBox provider uses TV season/episode route', async () => {
@@ -88,35 +84,26 @@ test('ClipBox provider uses TV season/episode route', async () => {
   assert.deepEqual(Array.from(streams), []);
 });
 
-test('FilmModu provider searches and decrypts Vidmixi player to extract HLS stream', async () => {
-  const password = 'secret-hash';
-  const salt = crypto.randomBytes(8);
-  const passBytes = Buffer.from(password, 'utf8');
-  let d = Buffer.alloc(0);
-  let di = Buffer.alloc(0);
-  while (d.length < 48) {
-    di = crypto.createHash('md5').update(Buffer.concat([di, passBytes, salt])).digest();
-    d = Buffer.concat([d, di]);
-  }
-  const cipher = crypto.createCipheriv('aes-256-cbc', d.subarray(0, 32), d.subarray(32, 48));
-  const encrypted = Buffer.concat([
-    cipher.update(JSON.stringify({ video_location: 'https://cdn.example/filmmodu.m3u8', title: 'Fight Club' }), 'utf8'),
-    cipher.final()
-  ]);
-  const setJson = JSON.stringify({ ct: encrypted.toString('base64'), s: salt.toString('hex') });
-  const ilkpartkod = btoa('<iframe src="https://vidmixi.example/embed/10"></iframe>');
-
-  const provider = await loadProvider('providers/castsinema-filmmodu.js', async (url, options = {}) => {
+test('FilmModu provider searches and extracts HLS stream', async () => {
+  const provider = await loadProvider('providers/castsinema-filmmodu.js', async (url) => {
     const u = String(url);
-    if (u.includes('/movie/550')) return response({ json: { title: 'Fight Club', original_title: 'Fight Club', imdb_id: 'tt0137523' } });
-    if (u === 'https://filmmodu.cc/arama/') return response({ text: '<a href="https://filmmodu.cc/film/fight-club">Fight Club</a>' });
-    if (u === 'https://filmmodu.cc/film/fight-club') return response({ text: "<script>var ilkpartkod='" + ilkpartkod + "';</script>" });
-    if (u === 'https://vidmixi.example/embed/10') return response({ text: `<script>bePlayer('${password}', '${setJson.replace(/\\/g, '\\\\')}');</script>` });
+    if (u.includes('/movie/603')) return response({ json: { title: 'The Matrix', original_title: 'The Matrix', release_date: '1999-03-31' } });
+    if (u.includes('/ara?q=')) {
+      return response({ text: '<a href="https://filmmodu.news/film/matrix" class="x"><div><img alt="Matrix Film izle"></div><h3>Matrix</h3><p>1999</p></a>' });
+    }
+    if (u === 'https://filmmodu.news/film/matrix') {
+      return response({ text: '<script src="/assets/js/core.js"></script><div data-pv="slug123"></div>' });
+    }
+    if (u.includes('/assets/js/s.php?s=slug123')) {
+      return response({ text: '<script>window.__PLAYER__ = {"stream":"https://cdn.example/fm/master.m3u8","audios":["Turkish"],"subs":[{"src":"https://cdn.example/fm/tr.vtt","lang":"tr","label":"Turkce"}]};</script>' });
+    }
+    if (u.includes('cdn.example/fm/master.m3u8')) return response({ text: '#EXTM3U' });
     return response({ ok: false });
   });
-  const streams = await provider.getStreams(550, 'movie', null, null);
-  assert.equal(streams.length, 1);
-  assert.equal(streams[0].url, 'https://cdn.example/filmmodu.m3u8');
+  const streams = await provider.getStreams(603, 'movie', null, null);
+  assert.ok(streams.length >= 1);
+  assert.equal(streams[0].url, 'https://cdn.example/fm/master.m3u8');
+  assert.equal(streams[0].format, 'm3u8');
 });
 
 
@@ -124,28 +111,40 @@ test('DiziMom provider searches and extracts HLS stream for TV series', async ()
   const provider = await loadProvider('providers/castsinema-dizimom.js', async (url) => {
     const u = String(url);
     if (u.includes('/tv/1399')) return response({ json: { name: 'Game of Thrones', original_name: 'Game of Thrones' } });
-    if (u.includes('/ara?q=')) return response({ text: '<a href="https://ddizimom.net/dizi/game-of-thrones">GoT</a>' });
-    if (u === 'https://ddizimom.net/dizi/game-of-thrones/sezon-2/bolum-3') return response({ text: '<div data-pv="got-s2e3"></div>' });
-    if (u.includes('pilavyerplay.top/assets/js/s.php')) return response({ text: '<script>window.__PLAYER__ = {"stream":"https://cdn.example/got.m3u8"};</script>' });
+    if (u.includes('/ara?q=')) return response({ text: '<a href="https://ddizimom.net/dizi/game-of-thrones"><h3>Game of Thrones</h3></a>' });
+    if (u === 'https://ddizimom.net/dizi/game-of-thrones/') return response({ text: '<a href="/dizi/game-of-thrones/sezon-2/bolum-3">S2E3</a>' });
+    if (u === 'https://ddizimom.net/dizi/game-of-thrones/sezon-2/bolum-3') return response({ text: '<div data-pv="pvslug123"></div><script src="https://ddizimom.net/assets/js/core.js"></script>' });
+    if (u.includes('s.php?s=pvslug123')) return response({ text: '<script>window.__PLAYER__ = {"stream":"https://cdn.example/got.m3u8","audios":["Turkish"],"subs":[{"src":"https://cdn.example/got.vtt","lang":"tr","label":"Turkce"}]};</script>' });
+    if (u.includes('cdn.example/got.m3u8')) return response({ text: '#EXTM3U' });
     return response({ ok: false });
   });
   const streams = await provider.getStreams(1399, 'tv', 2, 3);
-  assert.equal(streams.length, 1);
+  assert.ok(streams.length >= 1);
   assert.equal(streams[0].url, 'https://cdn.example/got.m3u8');
+  assert.equal(streams[0].format, 'm3u8');
 });
 
 test('SetFilmIzle provider queries admin-ajax to extract playable stream', async () => {
   const provider = await loadProvider('providers/castsinema-setfilmizle.js', async (url) => {
     const u = String(url);
     if (u.includes('/movie/550')) return response({ json: { title: 'Fight Club', original_title: 'Fight Club' } });
-    if (u.includes('/?s=')) return response({ text: '<a href="https://www.setfilmizle.ltd/film/fight-club/">Fight Club</a>' });
-    if (u === 'https://www.setfilmizle.ltd/film/fight-club/') return response({ text: '<script>var cfg = { nonces: { video: "NONCE1" }, post_id: 99 };</script><div data-player-name="SetPlay"></div>' });
-    if (u.includes('admin-ajax.php')) return response({ text: JSON.stringify({ success: true, data: { stream: { provider: 'SetPlay', url: 'https://cdn.example/setfilm.m3u8' } } }) });
+    if (u.includes('/?s=')) return response({ text: '<a class="card-link" href="https://www.setfilmizle.ltd/film/fight-club/">Fight Club<span class="card-ad">Fight Club</span></a>' });
+    if (u === 'https://www.setfilmizle.ltd/film/fight-club/') {
+      return response({ text: '<div id="stfPlayer" data-post-id="99"></div><script>video: "NONCE1"</script><div data-player-name="SetPlay" data-part-key=""></div>' });
+    }
+    if (u.includes('admin-ajax.php')) {
+      return response({ text: JSON.stringify({ success: true, data: { stream: { type: 'bridge', url: 'https://bridge.example/x' } } }) });
+    }
+    if (u === 'https://bridge.example/x') {
+      return response({ text: 'src: "https://cdn.example/setfilm.m3u8"' });
+    }
+    if (u.includes('cdn.example/setfilm.m3u8')) return response({ text: '#EXTM3U' });
     return response({ ok: false });
   });
   const streams = await provider.getStreams(550, 'movie', null, null);
-  assert.equal(streams.length, 1);
+  assert.ok(streams.length >= 1);
   assert.equal(streams[0].url, 'https://cdn.example/setfilm.m3u8');
+  assert.equal(streams[0].format, 'm3u8');
 });
 
 function b64utf8(text) {
@@ -197,16 +196,28 @@ test('FilmMakinesi provider never returns a trailer as the source', async () => 
 test('DiziBox provider finds episode and extracts m3u8 stream', async () => {
   const provider = await loadProvider('providers/castsinema-dizibox.js', async (url) => {
     const u = String(url);
-    if (u.includes('/tv/1104')) return response({ json: { name: 'Game of Thrones', original_name: 'Game of Thrones', external_ids: { imdb_id: 'tt0944947' } } });
-    if (u.includes('/ara?q=')) return response({ json: [{ slug: 'game-of-thrones-izle', title: 'Game of Thrones', poster_url: '/tt0944947.jpg' }] });
-    if (u === 'https://www.dizibox.live/diziler/game-of-thrones-izle/') return response({ text: '<a href="/game-of-thrones-izle-1-sezon-1-bolum-izle/">S1E1</a>' });
-    if (u === 'https://www.dizibox.live/game-of-thrones-izle-1-sezon-1-bolum-izle/') return response({ text: '<iframe src="https://player.example/king.php?v=1"></iframe>' });
-    if (u === 'https://player.example/king.php?v=1') return response({ text: 'var x="https://cdn.example/dizibox.m3u8";' });
+    if (u.includes('/tv/1104')) return response({ json: { name: 'Game of Thrones', original_name: 'Game of Thrones' } });
+    if (u.includes('/search/')) {
+      return response({ text: '<article class="detailed-article"><h3><a href="https://www.dizibox.live/diziler/game-of-thrones-izle/">Game of Thrones</a></h3></article>' });
+    }
+    if (u === 'https://www.dizibox.live/diziler/game-of-thrones-izle/') {
+      return response({ text: '<a href="https://www.dizibox.live/game-of-thrones-izle-1-sezon-1-bolum-izle/" class="season-episode">S1E1</a>' });
+    }
+    if (u === 'https://www.dizibox.live/game-of-thrones-izle-1-sezon-1-bolum-izle/') {
+      return response({ text: '<div id="video-area"><iframe src="https://example.com/king.php?v=1"></iframe></div>' });
+    }
+    if (u.includes('king.php?wmode=opaque')) {
+      return response({ text: '<div id="Player"><iframe src="https://example.com/embed/abc"></iframe></div>' });
+    }
+    if (u === 'https://example.com/embed/sheila/abc') {
+      return response({ text: '#EXTM3U\\n#EXT-X-STREAM-INF:BANDWIDTH=1000000\\nhttps://cdn.example/dizibox.m3u8' });
+    }
     return response({ ok: false });
   });
   const streams = await provider.getStreams(1104, 'tv', 1, 1);
-  assert.equal(streams.length, 1);
-  assert.equal(streams[0].url, 'https://cdn.example/dizibox.m3u8');
+  assert.ok(streams.length >= 1);
+  assert.equal(streams[0].url, 'https://example.com/embed/sheila/abc');
+  assert.equal(streams[0].format, 'm3u8');
 });
 
 

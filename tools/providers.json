@@ -174,5 +174,47 @@
       "season": 1,
       "episode": 1
     }
+  },
+  "castsinema-dizibal": {
+    "file": "providers/castsinema-dizibal.js",
+    "hostVar": "BASE",
+    "hostStyle": "single",
+    "base": "dizibal",
+    "www": false,
+    "marker": "DiziBal",
+    "test": {
+      "tmdbId": "903747",
+      "type": "tv",
+      "season": 1,
+      "episode": 1
+    }
+  },
+  "castsinema-dizipod": {
+    "file": "providers/castsinema-dizipod.js",
+    "hostVar": "BASE",
+    "hostStyle": "single",
+    "base": "dizipod",
+    "www": false,
+    "marker": "DiziPod",
+    "test": {
+      "tmdbId": "1396",
+      "type": "tv",
+      "season": 1,
+      "episode": 1
+    }
+  },
+  "castsinema-diziyou": {
+    "file": "providers/castsinema-diziyou.js",
+    "hostVar": "BASE",
+    "hostStyle": "single",
+    "base": "diziyou",
+    "www": true,
+    "marker": "diziyou",
+    "test": {
+      "tmdbId": "1396",
+      "type": "tv",
+      "season": 1,
+      "episode": 1
+    }
   }
 }

@@ -5,6 +5,19 @@ All notable changes to CastSinema-Addons will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/tr/).
 
+## [1.6.0] - 2026-11-13
+
+### Added
+- **3 yeni provider:** DiziBal (`dizibal.org`), DiziPod (`dizipod.com`), DiziYou
+  (`www.diziyou.one`) — film + dizi, gerçek HLS master + altyazı.
+- **6 mevcut provider yeniden yazıldı** (çalışan akışlarla): DiziBox, DiziMom,
+  SetFilmIzle, FilmModu, ClipBox, HDFilmCehennemi (zaten 1.5.0'ta).
+- FilmModu artık `filmmodu.news` alan adını ve pilavyerplay oynatıcısını kullanıyor.
+- Tüm provider'lar TMDB başlık çözümlemesi kullanıyor (Cinemeta erişilemez olduğunda).
+
+### Changed
+- Manifest sürümü `1.6.0`, 17 provider.
+
 ## [1.5.0] - 2026-11-13
 
 ### Fixed

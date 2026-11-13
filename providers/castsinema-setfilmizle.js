@@ -1,156 +1,284 @@
 /* SPDX-License-Identifier: MIT
  * CastSinema SetFilmIzle provider.
- * Turkish movie/series scraper for SetFilmIzle.
- * Logic learned from Wiojelt/Nuvio-Addons and rewritten for CastSinema.
+ * Turkish film/series scraper for SetFilmIzle (setfilmizle.ltd).
+ *
+ * Verified flow (live site, 2026-11):
+ *   TMDB title -> /?s= -> card -> film/dizi page -> admin-ajax get_video_url
+ *   -> XOR'd bridge page -> fastplay player -> HLS master + subtitles.
+ *
+ * Flow logic adapted from the working BigBull CS Nuvio addon (MIT).
  */
 "use strict";
 
-var HOST = "https://www.setfilmizle.ltd";
+var UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
+var MOBILE_UA = "Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36";
+var BASE = "https://www.setfilmizle.ltd";
 var TMDB_API = "https://api.themoviedb.org/3";
 var TMDB_KEY = "4e44d9029b1270a757cddc766a1bcb63";
-var UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36";
 
-function profileHeaders(ua) {
-  return { "User-Agent": ua, "Accept-Language": "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7" };
-}
-function requestProfiles() {
-  return [
-    profileHeaders("Dalvik/2.1.0 (Linux; U; Android 13; SM-G998B Build/TP1A.220624.014)"),
-    profileHeaders("okhttp/4.9.2"),
-    profileHeaders("ExoPlayerLib/2.19.1"),
-    profileHeaders("stagefright/1.2 (Linux;Android 11)"),
-    profileHeaders("VLC/3.0.21 LibVLC/3.0.21"),
-    profileHeaders("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"),
-    profileHeaders("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"),
-    profileHeaders("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 Edg/139.0.0.0"),
-    profileHeaders("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.2 Safari/605.1.15"),
-    {}
-  ];
-}
-var KEEP_HEADERS = ["accept", "referer", "origin", "range", "cookie", "content-type", "x-requested-with"];
-function mergeHeaders(base, profile) {
-  var headers = {}, key;
-  for (key in base) { if (Object.prototype.hasOwnProperty.call(base, key) && KEEP_HEADERS.indexOf(key) !== -1) headers[key] = base[key]; }
-  for (key in profile) { if (Object.prototype.hasOwnProperty.call(profile, key)) headers[key] = profile[key]; }
-  return headers;
-}
-function isRefused(response) {
-  if (!response) return true;
-  if (typeof response.status !== "number") return false;
-  return response.status === 403 || response.status === 503;
-}
-function netFetch(url, options) {
-  options = options || {};
-  var base = options.headers || {};
-  var profiles = requestProfiles();
-  var attempt = 0;
-  function next() {
-    if (attempt >= profiles.length) {
-      return fetch(url, { method: options.method || "GET", headers: mergeHeaders(base, profiles[profiles.length - 1]), body: options.body });
-    }
-    var profile = profiles[attempt++];
-    return fetch(url, { method: options.method || "GET", headers: mergeHeaders(base, profile), body: options.body }).then(function (response) {
-      if (!isRefused(response)) return response;
-      return next();
-    }).catch(function (error) {
-      if (attempt >= profiles.length) throw error;
-      return next();
+function text(url, opts) {
+  var o = opts || {};
+  var headers = { "User-Agent": o.mobile ? MOBILE_UA : UA, "Accept-Language": "tr-TR,tr;q=0.9" };
+  if (o.referer) headers.Referer = o.referer;
+  if (o.headers) for (var k in o.headers) headers[k] = o.headers[k];
+  return fetch(url, { method: o.method || "GET", headers: headers, body: o.body })
+    .then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status + " " + url);
+      return r.text();
     });
-  }
-  return next();
 }
 
-function getJson(url) {
-  return netFetch(url, { headers: { "User-Agent": UA, "Accept": "application/json" } })
-    .then(function (r) { return r.ok ? r.json() : null; })
-    .catch(function () { return null; });
+function first(pattern, body) {
+  var m = pattern.exec(String(body || ""));
+  return m ? m[1] : null;
 }
-function getText(url, referer) {
-  var headers = { "User-Agent": UA, "Accept": "text/html,application/xhtml+xml,*/*" };
-  if (referer) headers.Referer = referer;
-  return netFetch(url, { headers: headers })
-    .then(function (r) { return r.ok ? r.text() : ""; })
+
+function abs(base, href) {
+  if (!href) return null;
+  href = String(href).trim();
+  if (/^https?:/i.test(href)) return href;
+  var origin = /^(https?:\/\/[^/]+)/.exec(base);
+  if (href.charAt(0) === "/") return origin ? origin[1] + href : href;
+  return base.replace(/[^/]*$/, "") + href;
+}
+
+var B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+function b64(value) {
+  var raw = String(value || "").replace(/[^A-Za-z0-9+/=]/g, "");
+  var out = "";
+  var buf = 0;
+  var bits = 0;
+  for (var i = 0; i < raw.length; i++) {
+    var c = raw.charAt(i);
+    if (c === "=") break;
+    var v = B64.indexOf(c);
+    if (v < 0) continue;
+    buf = (buf << 6) | v;
+    bits += 6;
+    if (bits >= 8) {
+      bits -= 8;
+      out += String.fromCharCode((buf >> bits) & 0xff);
+    }
+  }
+  return out;
+}
+
+function norm(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[\u0131]/g, "i").replace(/[\u015f]/g, "s").replace(/[\u011f]/g, "g")
+    .replace(/[\u00fc]/g, "u").replace(/[\u00f6]/g, "o").replace(/[\u00e7]/g, "c")
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function spaced(v) {
+  return String(v || "").split(/[\s:\-]+/).map(norm).filter(Boolean).join(" ").replace(/^(?:the|an|a) /, "");
+}
+
+function pick(cards, wanted) {
+  var w = spaced(wanted);
+  if (!w) return null;
+  var subset = null;
+  for (var i = 0; i < cards.length; i++) {
+    var n = spaced(cards[i].title);
+    if (!n) continue;
+    if (n === w) return cards[i];
+    if (!subset && n.indexOf(w + " ") === 0) subset = cards[i];
+  }
+  return subset;
+}
+
+function titleOf(id, mediaType) {
+  var path = mediaType === "tv" ? "/tv/" : "/movie/";
+  return text(TMDB_API + path + encodeURIComponent(String(id)) + "?api_key=" + TMDB_KEY + "&language=tr-TR")
+    .then(function (body) {
+      var meta = JSON.parse(body) || {};
+      return String(meta.title || meta.name || meta.original_title || meta.original_name || "").trim();
+    })
     .catch(function () { return ""; });
 }
-function parseJson(str) { try { return JSON.parse(str); } catch (_) { return null; } }
 
-function getMediaInfo(tmdbId, isTv) {
-  var path = isTv ? "/tv/" : "/movie/";
-  return getJson(TMDB_API + path + "/" + encodeURIComponent(String(tmdbId)) + "?api_key=" + TMDB_KEY + "&language=tr-TR");
+function searchCards(html) {
+  var cards = [];
+  var re = /<a class="card-link" href="([^"]+)">([\s\S]*?)<\/a>/g;
+  var m;
+  while ((m = re.exec(html)) !== null) {
+    var title = first(/class="card-ad"[^>]*>([^<]*)</, m[2]);
+    if (!title) continue;
+    cards.push({ url: m[1].trim(), title: title.trim() });
+  }
+  return cards;
 }
 
-function searchSetFilm(query) {
-  return getText(HOST + "/?s=" + encodeURIComponent(query), HOST + "/");
+function qualityOf(master) {
+  var heights = [];
+  var re = /RESOLUTION=\d+x(\d+)/gi;
+  var m;
+  while ((m = re.exec(String(master || ""))) !== null) heights.push(parseInt(m[1], 10));
+  var max = 0;
+  for (var i = 0; i < heights.length; i++) if (heights[i] > max) max = heights[i];
+  if (!max) return "auto";
+  if (max >= 2160) return "2160p";
+  if (max >= 1080) return "1080p";
+  if (max >= 720) return "720p";
+  if (max >= 480) return "480p";
+  return "360p";
+}
+
+function parseSubtitles(html) {
+  var json = first(/subtitles:\s*(\[[\s\S]*?])\s*,/, html);
+  if (!json) return [];
+  var list;
+  try { list = JSON.parse(json); } catch (e) { return []; }
+  var subs = [];
+  for (var i = 0; i < list.length; i++) {
+    var item = list[i] || {};
+    var url = String(item.file || "");
+    if (!/^https?:/.test(url)) continue;
+    var kind = String(item.kind || "");
+    if (kind && kind !== "captions") continue;
+    var label = String(item.label || item.lang || "Altyazi").trim();
+    subs.push({ url: url, language: String(item.lang || "").trim() || label, name: label + " [SetFilmIzle]" });
+  }
+  return subs;
+}
+
+function xorUrl(first, second) {
+  var a = b64(first);
+  var b = b64(second);
+  if (!a.length || !b.length) return null;
+  var out = "";
+  for (var i = 0; i < a.length; i++) out += String.fromCharCode(a.charCodeAt(i) ^ b.charCodeAt(i % b.length));
+  var parts = out.split("|");
+  for (var j = 0; j < parts.length; j++) if (/^https?:/.test(parts[j])) return parts[j].trim();
+  return null;
+}
+
+function episodeUrl(seriesHtml, want, wantEp) {
+  var re = /\/bolum\/([^"]*?)-(\d+)-sezon-(\d+)-bolum\//g;
+  var m;
+  var fallback = null;
+  while ((m = re.exec(seriesHtml)) !== null) {
+    var href = abs(BASE, m[0]);
+    if (parseInt(m[2], 10) === want && parseInt(m[3], 10) === wantEp) return href;
+    if (!fallback) fallback = href;
+  }
+  return null;
+}
+
+function playerRows(html, pageUrl) {
+  var nested = /cerceve\(\s*"b2"\s*,\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\)/.exec(html);
+  if (nested) {
+    var next = xorUrl(nested[1], nested[2]);
+    if (!next) return Promise.resolve([]);
+    return text(next, { referer: "https://setplay.sbs/" }).then(function (body) {
+      return playerRows(body, next);
+    });
+  }
+  var src = first(/src:\s*"([^"]+)"/, html);
+  if (!src) return Promise.resolve([]);
+  var url = abs(pageUrl, src.replace(/\\\//g, "/"));
+  var subs = parseSubtitles(html);
+  return text(url, { referer: pageUrl, mobile: true })
+    .then(function (master) {
+      return [{ url: url, quality: qualityOf(master), subs: subs, referer: pageUrl }];
+    })
+    .catch(function () {
+      return [{ url: url, quality: "auto", subs: subs, referer: pageUrl }];
+    });
+}
+
+function streamsFor(pageUrl) {
+  return text(pageUrl).then(function (html) {
+    var postId = first(/id="stfPlayer"[^>]*data-post-id="(\d+)"/, html);
+    var nonce = first(/video:\s*"([^"]+)"/, html) || "";
+    var players = [];
+    var re = /data-player-name="([^"]*)"\s+data-part-key="([^"]*)"/g;
+    var m;
+    while ((m = re.exec(html)) !== null) players.push({ name: m[1] || "SetPlay", key: m[2] || "" });
+    if (!postId) return [];
+    if (!players.length) players.push({ name: "SetPlay", key: "" });
+
+    return Promise.all(players.map(function (player) {
+      return text(BASE + "/wp-admin/admin-ajax.php", {
+        method: "POST",
+        headers: { "X-Requested-With": "XMLHttpRequest", "Content-Type": "application/x-www-form-urlencoded" },
+        referer: pageUrl,
+        body:
+          "action=get_video_url&nonce=" + encodeURIComponent(nonce) +
+          "&post_id=" + encodeURIComponent(postId) +
+          "&player_name=" + encodeURIComponent(player.name) +
+          "&part_key=" + encodeURIComponent(player.key) +
+          "&taze=1"
+      }).then(function (body) {
+        var data = JSON.parse(body).data || {};
+        var stream = data.stream || {};
+        if (stream.type !== "bridge") return null;
+        var bridge = String(stream.url || "");
+        if (!/^http/.test(bridge)) return null;
+        return bridge;
+      }).then(function (bridgeUrl) {
+        if (!bridgeUrl) return null;
+        return text(bridgeUrl, { referer: pageUrl }).then(function (bridgeHtml) {
+          return playerRows(bridgeHtml, bridgeUrl);
+        });
+      }).catch(function () { return null; });
+    })).then(function (groups) {
+      var rows = [];
+      var seen = {};
+      var subs = [];
+      for (var i = 0; i < groups.length; i++) {
+        if (!groups[i]) continue;
+        for (var j = 0; j < groups[i].length; j++) {
+          var item = groups[i][j];
+          if (seen[item.url]) continue;
+          seen[item.url] = true;
+          if (!subs.length) subs = item.subs;
+          rows.push({
+            name: "CastSinema • SetFilmIzle",
+            title: "SetFilmIzle • " + item.quality + " • HLS",
+            url: item.url,
+            quality: item.quality,
+            provider: "castsinema-setfilmizle",
+            format: "m3u8",
+            headers: { "User-Agent": MOBILE_UA, "Referer": item.referer, "Accept": "*/*" },
+            behaviorHints: { notWebReady: true, proxyHeaders: { request: { "User-Agent": MOBILE_UA, "Referer": item.referer } } },
+            subtitles: subs
+          });
+        }
+      }
+      return rows;
+    });
+  }).catch(function (e) {
+    console.error("[CastSinema SetFilmIzle] " + (e && e.message ? e.message : String(e)));
+    return [];
+  });
 }
 
 function getStreams(tmdbId, mediaType, season, episode) {
-  if (tmdbId == null) return Promise.resolve([]);
-  var isTv = mediaType === "tv" && season != null && episode != null;
+  var want = parseInt(season, 10) || 1;
+  var wantEp = parseInt(episode, 10) || 1;
+  var isTv = mediaType === "tv";
 
-  return getMediaInfo(tmdbId, isTv).then(function (info) {
-    var title = info ? (info.title || info.name || info.original_title || info.original_name) : "";
-    var query = title || String(tmdbId);
-    return searchSetFilm(query).then(function (html) {
-      if (!html && info && info.original_title && info.original_title !== title) {
-        return searchSetFilm(info.original_title).then(function (h2) { return { html: h2 || "", title: title || "Media" }; });
-      }
-      return { html: html || "", title: title || "Media" };
+  return titleOf(tmdbId, mediaType).then(function (title) {
+    if (!title) return null;
+    return text(BASE + "/?s=" + encodeURIComponent(title)).then(function (html) {
+      var cards = searchCards(html);
+      var wanted = isTv ? cards.filter(function (c) { return c.url.indexOf("/dizi/") !== -1; }) : cards;
+      return pick(wanted.length ? wanted : cards, title);
     });
-  }).then(function (ctx) {
-    if (!ctx || !ctx.html) return [];
-    var cardMatch = /href=["'](https?:\/\/www\.setfilmizle\.ltd\/(?:film|dizi)\/[^"']+)["']/i.exec(ctx.html);
-    if (!cardMatch) {
-      cardMatch = /href=["'](\/(?:film|dizi)\/[^"']+)["']/i.exec(ctx.html);
-    }
-    if (!cardMatch) return [];
-    var itemUrl = cardMatch[1];
-    if (itemUrl.charAt(0) === "/") itemUrl = HOST + itemUrl;
-    if (isTv) {
-      itemUrl = itemUrl.replace(/\/$/, "") + "/sezon-" + season + "-bolum-" + episode + "/";
-    }
-
-    return getText(itemUrl, HOST + "/").then(function (pageHtml) {
-      if (!pageHtml) return [];
-      var nonceMatch = /nonces:\s*\{[^}]*video:\s*["']([^"']+)["']/i.exec(pageHtml);
-      var postIdMatch = /(?:post_id["':\s]+|data-post-id=["']|post-)(\d+)/i.exec(pageHtml);
-      var playerMatch = /data-player-name=["']([^"']+)["']/i.exec(pageHtml);
-      if (!nonceMatch || !postIdMatch) return [];
-
-      var nonce = nonceMatch[1];
-      var postId = postIdMatch[1];
-      var playerName = playerMatch ? playerMatch[1] : "SetPlay";
-      var body = "action=get_video_url&nonce=" + encodeURIComponent(nonce) +
-        "&post_id=" + encodeURIComponent(postId) +
-        "&player_name=" + encodeURIComponent(playerName) +
-        "&part_key=";
-
-      return netFetch(HOST + "/wp-admin/admin-ajax.php", {
-        method: "POST",
-        headers: {
-          "User-Agent": UA,
-          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-          "Referer": itemUrl,
-          "X-Requested-With": "XMLHttpRequest"
-        },
-        body: body
-      }).then(function (r) { return r.ok ? r.text() : ""; })
-        .then(function (ajaxText) {
-          var payload = parseJson(ajaxText);
-          if (!payload || !payload.success || !payload.data || !payload.data.stream || !payload.data.stream.url) return [];
-          var stream = payload.data.stream;
-          return [{
-            name: "CastSinema • SetFilmIzle",
-            title: "SetFilmIzle • " + ctx.title + " • " + (stream.provider || playerName || "SetPlay"),
-            url: stream.url,
-            quality: 1080,
-            provider: "castsinema-setfilmizle",
-            format: /m3u8/i.test(String(stream.url || "")) ? "m3u8" : "video",
-            headers: { "User-Agent": UA, "Referer": itemUrl }
-          }];
-        });
+  }).then(function (card) {
+    if (!card) return [];
+    if (!isTv) return streamsFor(card.url);
+    return text(card.url).then(function (seriesHtml) {
+      var url = episodeUrl(seriesHtml, want, wantEp);
+      return url ? streamsFor(url) : [];
     });
-  }).catch(function (error) {
-    console.error("[CastSinema SetFilmIzle] " + (error && error.message ? error.message : String(error)));
+  }).then(function (rows) {
+    return rows || [];
+  }).catch(function (e) {
+    console.error("[CastSinema SetFilmIzle] " + (e && e.message ? e.message : String(e)));
     return [];
   });
 }

@@ -51,8 +51,11 @@ yayınlayamazsınız.
 | **Webteizle** | `webteizle.info` | film | ✅ çalışıyor |
 | **Sezonluk Dizi** | `sezonlukdizi.cc` | dizi | ✅ çalışıyor |
 | **DiziFilmizle** | `dizifilmizle.to` | film + dizi | ✅ çalışıyor |
+| **DiziBal** | `dizibal.org` | film + dizi | ✅ çalışıyor (HLS + altyazı) |
+| **DiziPod** | `dizipod.com` | dizi | ✅ çalışıyor (HLS) |
+| **DiziYou** | `www.diziyou.one` | film + dizi | ✅ çalışıyor (HLS + altyazı) |
 
-13 provider. Durumlar `tools/domain_watch.py` tarafından canlı olarak
+17 provider. Durumlar `tools/domain_watch.py` tarafından canlı olarak
 doğrulanır (aşağıya bakın).
 
 > **Durum tablosu zamanla eskir.** Güncel tabloyu
@@ -159,8 +162,8 @@ her 6 saatte bir otomatik çalışacak şekilde tanımlıdır:
 
 ```text
 CastSinema/
-├── manifest.json           # 14 scraper tanımı
-├── providers/              # 14 provider JS dosyası
+├── manifest.json           # 17 scraper tanımı
+├── providers/              # 17 provider JS dosyası
 ├── assets/logo.png         # picker logosu
 ├── scripts/
 │   ├── validate.mjs        # manifest + provider doğrulaması
