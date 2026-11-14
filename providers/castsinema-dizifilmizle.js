@@ -36,7 +36,7 @@ function requestProfiles() {
 var KEEP_HEADERS = ["accept", "referer", "origin", "range", "if-none-match", "if-modified-since", "cookie", "content-type", "x-requested-with"];
 function mergeHeaders(base, profile) {
   var headers = {}, key;
-  for (key in base) { if (Object.prototype.hasOwnProperty.call(base, key) && KEEP_HEADERS.indexOf(key) !== -1) headers[key] = base[key]; }
+  for (key in base) { if (Object.prototype.hasOwnProperty.call(base, key) && KEEP_HEADERS.indexOf(String(key).toLowerCase()) !== -1) headers[key] = base[key]; }
   for (key in profile) { if (Object.prototype.hasOwnProperty.call(profile, key)) headers[key] = profile[key]; }
   return headers;
 }
@@ -352,7 +352,24 @@ function resolveEmbed(embedUrl, referer) {
     var setRaw = pm[2].replace(/\\"/g, '"').replace(/\\\//g, "/");
     var params = decryptAes(setRaw, hash);
     if (!params || !params.video_location) return null;
-    return params.video_location;
+    var subs = [];
+    var tracks = params.strSubtitles || [];
+    for (var i = 0; i < tracks.length; i++) {
+      var track = tracks[i] || {};
+      if (!track.file) continue;
+      var file = String(track.file);
+      if (!/^https?:/i.test(file)) file = "https://vidmixi.com" + (file.charAt(0) === "/" ? file : "/" + file);
+      var label = String(track.label || "Altyazi");
+      subs.push({
+        url: file,
+        language: /t[üu]rk/i.test(label) || /^tur$/i.test(String(track.language || "")) ? "tr"
+          : (/eng/i.test(label) || /^eng$/i.test(String(track.language || "")) ? "en" : ""),
+        name: label + " [DiziFilmizle]"
+      });
+    }
+    // Vidmixi hands out an opaque /list/<token> endpoint that serves the HLS
+    // master (audio LANGUAGE="tur") rather than a .m3u8 file name.
+    return { url: params.video_location, subs: subs };
   }).catch(function () { return null; });
 }
 
@@ -366,16 +383,19 @@ function resolvePage(pageUrl, title, wantType) {
     embeds.forEach(function (embedUrl, idx) {
       chain = chain.then(function () {
         if (streams.length >= 2) return;
-        return resolveEmbed(embedUrl, pageUrl).then(function (file) {
-          if (!file) return;
+        return resolveEmbed(embedUrl, pageUrl).then(function (hit) {
+          if (!hit || !hit.url) return;
+          var file = hit.url;
+          var hls = /\.m3u8/i.test(file) || /vidmixi\.com\/list\//i.test(file);
           streams.push({
             name: "CastSinema • DiziFilmizle",
-            title: "DiziFilmizle • " + title + (idx > 0 ? " • Alt " + (idx + 1) : "") + " - HD",
+            title: "DiziFilmizle • " + title + (idx > 0 ? " • Alt " + (idx + 1) : "") + " • TR Dublaj - HD",
             url: file,
             quality: 1080,
             provider: "castsinema-dizifilmizle",
-            format: /\.m3u8/i.test(file) ? "m3u8" : "mp4",
-            headers: { "User-Agent": UA, "Referer": embedUrl }
+            format: hls ? "m3u8" : "mp4",
+            headers: { "User-Agent": UA, "Referer": embedUrl },
+            subtitles: hit.subs
           });
         });
       });

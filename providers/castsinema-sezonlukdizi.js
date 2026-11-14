@@ -732,6 +732,7 @@ function loadFilemoon(embedPage) {
                       title: "SezonlukDizi • Filemoon " + quality,
                       url: source.url,
                       quality: quality,
+                      format: "m3u8",
                       headers: { Referer: apiOrigin + "/", "User-Agent": UA },
                       subtitles: subs
                     });
@@ -760,6 +761,7 @@ function loadPlainEmbed(embedPage) {
           title: "SezonlukDizi • HLS",
           url: hls,
           quality: "auto",
+          format: "m3u8",
           headers: { Referer: embedPage, "User-Agent": UA },
           subtitles: []
         }

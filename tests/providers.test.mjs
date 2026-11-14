@@ -53,7 +53,21 @@ test('CastSinema manifest uses the current scraper repository schema', async () 
     assert.ok(scraper.id);
     assert.ok(scraper.filename);
     assert.equal(typeof scraper.enabled, 'boolean');
+    assert.ok(scraper.id.startsWith('castsinema-'), `${scraper.id} must use the castsinema- prefix`);
+    assert.equal(scraper.filename, `providers/${scraper.id}.js`);
+    const source = await fs.readFile(new URL(`../${scraper.filename}`, import.meta.url), 'utf8');
+    assert.ok(source.includes(`provider: "${scraper.id}"`), `${scraper.filename} must expose provider id ${scraper.id}`);
     await fs.access(new URL(`../${scraper.filename}`, import.meta.url));
+  }
+});
+
+test('mode: no embed pages are returned; every provider emits playable formats', async () => {
+  const manifest = JSON.parse(await fs.readFile(new URL('../manifest.json', import.meta.url), 'utf8'));
+  for (const scraper of manifest.scrapers) {
+    assert.ok(Array.isArray(scraper.formats) && scraper.formats.length > 0, `${scraper.id} needs formats`);
+    for (const format of scraper.formats) {
+      assert.ok(['m3u8', 'mp4'].includes(format), `${scraper.id} advertises unsupported format ${format}`);
+    }
   }
 });
 
@@ -269,7 +283,7 @@ test('HDFilmCehennemi provider extracts TV episode stream', async () => {
 });
 
 
-test('BoxFilm provider decodes the rotated player code into an HLS manifest', async () => {
+test('BoxFilm provider decodes the rotated player code into an HLS manifest with subtitles', async () => {
   const calls = [];
   const provider = await loadProvider('providers/castsinema-boxfilm.js', async (url) => {
     calls.push(String(url));
@@ -281,7 +295,14 @@ test('BoxFilm provider decodes the rotated player code into an HLS manifest', as
     }
     if (String(url).includes('/boxes/abc')) {
       const f = 'https://cdn.example/hls/abc_master.m3u8';
-      return response({ text: `<script>jwplayer('player').setup(JSON.parse('{"file":"${f}"}'));</script>` });
+      const config = JSON.stringify({
+        file: f,
+        tracks: [
+          { file: 'https://cdn.example/sub/tr.vtt', label: 'T\u00fcrk\u00e7e', kind: 'captions' },
+          { file: 'https://cdn.example/sub/en.vtt', label: 'English', kind: 'captions' }
+        ]
+      }).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\u0022');
+      return response({ text: `<script>jwplayer('player').setup(JSON.parse('${config}'));</script>` });
     }
     return response({ ok: false });
   });
@@ -290,6 +311,10 @@ test('BoxFilm provider decodes the rotated player code into an HLS manifest', as
   assert.equal(streams[0].provider, 'castsinema-boxfilm');
   assert.equal(streams[0].format, 'm3u8');
   assert.ok(streams[0].url.startsWith('https://cdn.example/hls/'));
+  assert.equal(streams[0].subtitles.length, 2);
+  assert.equal(streams[0].subtitles[0].language, 'tr');
+  assert.equal(streams[0].subtitles[1].language, 'en');
+  assert.ok(streams[0].headers.Referer.includes('/boxes/abc'));
   assert.ok(calls.some((c) => c.includes('/api/search?q=')));
 });
 
@@ -334,7 +359,14 @@ test('DiziFilmizle provider searches and extracts Vidmixi stream for movie', asy
   }
   const cipher = crypto.createCipheriv('aes-256-cbc', d.subarray(0, 32), d.subarray(32, 48));
   const encrypted = Buffer.concat([
-    cipher.update(JSON.stringify({ video_location: 'https://cdn.example/dizifilmizle.m3u8', title: 'Fight Club' }), 'utf8'),
+    cipher.update(JSON.stringify({
+      video_location: 'https://cdn.example/dizifilmizle.m3u8',
+      title: 'Fight Club',
+      strSubtitles: [
+        { file: '/upload/subs/tr.vtt', label: 'Turkish', language: 'tur' },
+        { file: 'https://cdn.example/subs/en.vtt', label: 'English', language: 'eng' }
+      ]
+    }), 'utf8'),
     cipher.final()
   ]);
   const setJson = JSON.stringify({ ct: encrypted.toString('base64'), s: salt.toString('hex') });
@@ -350,7 +382,12 @@ test('DiziFilmizle provider searches and extracts Vidmixi stream for movie', asy
   const streams = await provider.getStreams(550, 'movie', null, null);
   assert.equal(streams.length, 1);
   assert.equal(streams[0].url, 'https://cdn.example/dizifilmizle.m3u8');
+  assert.equal(streams[0].format, 'm3u8');
   assert.equal(streams[0].provider, 'castsinema-dizifilmizle');
+  assert.ok(streams[0].title.includes('TR Dublaj'));
+  assert.equal(streams[0].subtitles.length, 2);
+  assert.equal(streams[0].subtitles[0].language, 'tr');
+  assert.equal(streams[0].subtitles[0].url, 'https://vidmixi.com/upload/subs/tr.vtt');
 });
 
 test('Dizilla provider finds episode via slug/search and extracts pichive master stream', async () => {
@@ -370,4 +407,92 @@ test('Dizilla provider finds episode via slug/search and extracts pichive master
   assert.equal(streams[0].headers.Referer, 'https://four.pichive.online/iframe.php?v=abc');
   assert.equal(streams[0].headers['User-Agent'], 'okhttp/4.9.2');
   assert.equal(streams[0].provider, 'castsinema-dizilla');
+});
+
+test('Xpass provider decrypts the AES-256-GCM source index and returns HLS mirrors', async () => {
+  const salt = 'spv3-build-1787821613-50e5fc97c9dce367';
+  const token = 'tok123';
+  const pathname = '/data/movie/603';
+  const dataUrl = pathname + '?autostart=false&token=' + token;
+
+  const key = crypto.createHash('sha256').update('spv3-data-response|' + salt + '|' + pathname + '|' + token, 'utf8').digest();
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+  const sealed = Buffer.concat([
+    cipher.update(JSON.stringify([
+      { id: 'a', name: 'FIL 1', url: '/mdata/a/0/playlist.json', dl: false },
+      { id: 'b', name: 'FIL 2', url: '/mdata/b/1/playlist.json', dl: false }
+    ]), 'utf8'),
+    cipher.final(),
+    cipher.getAuthTag()
+  ]);
+  const payload = Buffer.concat([iv, sealed]).toString('base64url');
+
+  const provider = await loadProvider('providers/castsinema-xpass.js', async (url) => {
+    const u = String(url);
+    if (u === 'https://play.xpass.top/e/movie/603') {
+      return response({ text: '<script src="/static/bundle.js?v=1794075771"></script><script>var dataUrl="' + dataUrl + '";</script>' });
+    }
+    if (u.startsWith('https://play.xpass.top/static/')) {
+      return response({ text: 'const build="' + salt + '";' });
+    }
+    if (u === 'https://play.xpass.top' + pathname + '?autostart=false&token=' + token) {
+      return response({ text: payload });
+    }
+    if (u.includes('/mdata/a/0/playlist.json')) {
+      return response({ json: { playlist: [{ sources: [{ file: 'https://cdn.example/a/master.m3u8', type: 'hls', label: 'TIK 2' }] }] } });
+    }
+    if (u.includes('/mdata/b/1/playlist.json')) {
+      return response({ json: { playlist: [{ sources: [{ file: 'https://cdn.example/b/master.m3u8', type: 'hls', label: 'VIP 1' }] }] } });
+    }
+    return response({ ok: false });
+  });
+
+  const streams = await provider.getStreams('603', 'movie', null, null);
+  assert.equal(streams.length, 2);
+  assert.equal(streams[0].format, 'm3u8');
+  assert.equal(streams[0].provider, 'castsinema-xpass');
+  assert.ok(streams[0].url.includes('cdn.example/a/'));
+  assert.ok(streams[1].url.includes('cdn.example/b/'));
+  assert.equal(streams[0].behaviorHints.proxyHeaders.request.Referer, 'https://play.xpass.top/');
+});
+
+test('Xpass provider returns an empty list when the payload cannot be authenticated', async () => {
+  const provider = await loadProvider('providers/castsinema-xpass.js', async (url) => {
+    const u = String(url);
+    if (u === 'https://play.xpass.top/e/movie/603') {
+      return response({ text: '<script>var dataUrl="/data/movie/603?token=tok123";</script>' });
+    }
+    if (u.startsWith('https://play.xpass.top/data/')) {
+      return response({ text: Buffer.alloc(64, 7).toString('base64url') });
+    }
+    return response({ ok: false });
+  });
+  const streams = await provider.getStreams('603', 'movie', null, null);
+  assert.deepEqual(Array.from(streams), []);
+});
+
+test('YesilCam TV provider labels query-string HLS mirrors as m3u8', async () => {
+  const provider = await loadProvider('providers/castsinema-yesilcamtv.js', async (url) => {
+    const u = String(url);
+    if (u.includes('v3-cinemeta.strem.io/meta/movie/tt0297138.json')) {
+      return response({ json: { meta: { name: 'Selvi Boylum Al Yazmalim' } } });
+    }
+    if (u.startsWith('https://yesilcamtv.com.tr/?s=')) {
+      return response({ text: '<a href="https://yesilcamtv.com.tr/selvi-boylum-al-yazmalim-izle/"><img alt="Selvi Boylum Al Yazmalim"></a>' });
+    }
+    if (u === 'https://yesilcamtv.com.tr/selvi-boylum-al-yazmalim-izle/') {
+      return response({ text: '<iframe src="https://rumble.com/embed/v123abc/"></iframe>' });
+    }
+    if (u === 'https://rumble.com/embed/v123abc/') {
+      return response({ text: '"1080":{"url":"https:\\/\\/hugh.cdn.rumble.cloud\\/video\\/x\\/y?r_file=chunklist.m3u8&r=1","meta":{"bitrate":4500,"size":12345,"w":1920,"h":1080}' });
+    }
+    return response({ ok: false });
+  });
+  const streams = await provider.getStreams('tt0297138', 'movie', null, null);
+  assert.ok(streams.length >= 1);
+  assert.equal(streams[0].format, 'm3u8');
+  assert.equal(streams[0].provider, 'castsinema-yesilcamtv');
+  assert.ok(streams[0].quality.startsWith('1080p'));
+  assert.ok(streams[0].url.includes('chunklist.m3u8'));
 });

@@ -5,6 +5,49 @@ All notable changes to CastSinema-Addons will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/tr/).
 
+## [1.8.0] - 2026-11-14
+
+### Added
+- **16 yeni provider** (gerçek, oynatılabilir akışlarla):
+  - Film: JetFilmizle (godrive + videopark), Yeşilçam TV (Rumble HLS/MP4).
+  - Film + dizi: DiziPal, SelcukFlix (şifreli player token → HLS), Sinemetrik,
+    WebdramaTurkey2, PuhuTV (DYG HLS), RecTV (imzalı API).
+  - Dizi: Ddizi (tabii MP4), Dizikorea3 (HLS), TLC Türkiye ve DMAX (DYG HLS),
+    BelgeselX (MP4).
+  - Anime: AnimeciX (MP4), Anizium (MP4 + altyazı), AsyaAnimeleri (HLS).
+- Tüm yeni provider'lar kaynak başına **TR Dublaj / Altyazılı** etiketleri,
+  birden çok kalite/ayna ve `provider` kimliği döndürür.
+- Altyazılı kaynaklarda `subtitles[]` (Türkçe/İngilizce) akışa eklenir.
+
+### Fixed
+- **Xpass** yeniden yazıldı: oynatıcı `/data` yanıtı AES-256-GCM ile çözülür,
+  anahtar `SHA-256("spv3-data-response|<salt>|<path>|<token>")`, salt çalışma
+  anında bundle'dan alınır. 20+ ayna yerine ilk 12 ayna okunur ve her istek
+  8 sn ile sınırlandırılır (30 sn → ~1 sn).
+- **BoxFilm**: HLS CDN artık `Referer` = `boxload.xyz/boxes/<id>` ve
+  `Origin: https://boxload.xyz` ile 200 döner; oyuncu config'inden Türkçe,
+  İngilizce ve zorunlu altyazı izleri çıkarılır.
+- **Webteizle** yeniden yazıldı (win1254 çözümü, vidmoly/rubyhub/ok.ru/pixel).
+- Format çıkarımı: sorgu dizesinde `master/chunklist/playlist.m3u8` geçen veya
+  `/hls/` içeren URL'ler artık `m3u8` olarak işaretleniyor (Yeşilçam TV,
+  WebdramaTurkey2).
+
+### Changed
+- Manifest sürümü `1.8.0`, **33 provider**; `tools/providers.json` ve birim
+  testleri (20 test) yeni provider'ları kapsıyor.
+- Cloudflare WAF nedeniyle CI çıkışından doğrulanamayan provider'lar
+  (DiziPal, SelcukFlix, Dizilla, Webteizle) README'de ayrıca işaretlendi.
+
+## [1.7.0] - 2026-11-13
+
+### Fixed
+- **Sezonluk Dizi** yeniden yazıldı: Filemoon oynatıcısı ECDSA proof-of-work
+  attestation ister; provider saf JS SHA-256/AES-GCM ile imzalı isteği üretip
+  HLS master ve altyazıları döndürür.
+
+### Changed
+- Sezonluk Dizi `1.1.0` sürümüne ve `m3u8` formatına geçirildi.
+
 ## [1.6.0] - 2026-11-13
 
 ### Added

@@ -32,7 +32,7 @@ function requestProfiles() {
 var KEEP_HEADERS = ["accept", "referer", "origin", "range", "cookie", "content-type", "x-requested-with"];
 function mergeHeaders(base, profile) {
   var headers = {}, key;
-  for (key in base) { if (Object.prototype.hasOwnProperty.call(base, key) && KEEP_HEADERS.indexOf(key) !== -1) headers[key] = base[key]; }
+  for (key in base) { if (Object.prototype.hasOwnProperty.call(base, key) && KEEP_HEADERS.indexOf(String(key).toLowerCase()) !== -1) headers[key] = base[key]; }
   for (key in profile) { if (Object.prototype.hasOwnProperty.call(profile, key)) headers[key] = profile[key]; }
   return headers;
 }

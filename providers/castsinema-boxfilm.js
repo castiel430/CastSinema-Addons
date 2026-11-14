@@ -133,22 +133,29 @@ function unescapeLiteral(body) {
 // The player configuration is a JSON string literal handed to JSON.parse.
 // Undoing the JavaScript level escapes first leaves valid JSON behind, so
 // JSON.parse does the rest.
-function extractManifest(html) {
+function extractPlayer(html) {
   var text = String(html || "");
   var match = /JSON\.parse\('(\{[\s\S]*?\})'\)/.exec(text);
   if (match) {
     try {
       var config = JSON.parse(unescapeLiteral(match[1]));
-      if (config && config.file && /\.m3u8(?:[?#]|$)/i.test(config.file)) return config.file;
+      if (config && config.file && /\.m3u8(?:[?#]|$)/i.test(config.file)) {
+        return { file: config.file, tracks: Array.isArray(config.tracks) ? config.tracks : [] };
+      }
     } catch (_) {}
   }
   // Fallback: the manifest is the only .m3u8 on the page.
   var index = text.indexOf("_master.m3u8");
-  if (index < 0) return "";
+  if (index < 0) return null;
   var start = text.lastIndexOf("https", index);
-  if (start < 0) return "";
+  if (start < 0) return null;
   var url = unescapeLiteral(text.slice(start, index + 13)).replace(/\\/g, "");
-  return /^https?:\/\//i.test(url) ? url : "";
+  return /^https?:\/\//i.test(url) ? { file: url, tracks: [] } : null;
+}
+
+function extractManifest(html) {
+  var player = extractPlayer(html);
+  return player ? player.file : "";
 }
 
 function decodePlayerCode(code) {
@@ -218,16 +225,32 @@ function resolveItem(item, title) {
     var playerUrl = decodePlayerCode(code[1]);
     if (!playerUrl) return [];
     return getText(playerUrl, pageUrl).then(function (playerHtml) {
-      var manifest = extractManifest(playerHtml);
-      if (!manifest) return [];
+      var player = extractPlayer(playerHtml);
+      if (!player || !player.file) return [];
+      var subs = [];
+      for (var i = 0; i < player.tracks.length; i++) {
+        var track = player.tracks[i] || {};
+        if (!track.file) continue;
+        var label = String(track.label || track.language || "Altyazi").trim();
+        subs.push({
+          url: track.file,
+          language: /t[üu]rk/i.test(label) ? "tr" : (/eng/i.test(label) ? "en" : ""),
+          name: label + " [BoxFilm]",
+          headers: { "User-Agent": UA, Referer: playerUrl }
+        });
+      }
+      // The HLS CDN only answers requests whose Referer is the player host.
+      var headers = { "User-Agent": UA, "Referer": playerUrl, "Origin": "https://boxload.xyz" };
       return [{
         name: "CastSinema • BoxFilm",
         title: "BoxFilm • " + (title || item.title || "Film") + " • " + (item.language_label || "DUAL") + " • 1080p",
-        url: manifest,
+        url: player.file,
         quality: 1080,
         provider: "castsinema-boxfilm",
         format: "m3u8",
-        headers: { "User-Agent": UA, "Referer": pageUrl }
+        headers: headers,
+        behaviorHints: { notWebReady: true, proxyHeaders: { request: headers } },
+        subtitles: subs
       }];
     });
   });

@@ -95,7 +95,7 @@
     "www": false,
     "marker": "FilmMakinesi",
     "test": {
-      "tmdbId": "550",
+      "tmdbId": "504827",
       "type": "movie"
     }
   },
@@ -143,7 +143,7 @@
     "www": true,
     "marker": "Sezonluk Dizi",
     "test": {
-      "tmdbId": "1399",
+      "tmdbId": "66732",
       "type": "tv",
       "season": 1,
       "episode": 1
@@ -183,7 +183,7 @@
     "www": false,
     "marker": "DiziBal",
     "test": {
-      "tmdbId": "903747",
+      "tmdbId": "1396",
       "type": "tv",
       "season": 1,
       "episode": 1
@@ -212,6 +212,220 @@
     "marker": "diziyou",
     "test": {
       "tmdbId": "1396",
+      "type": "tv",
+      "season": 1,
+      "episode": 1
+    }
+  },
+  "castsinema-jetfilmizle": {
+    "file": "providers/castsinema-jetfilmizle.js",
+    "hostVar": "BASE",
+    "hostStyle": "single",
+    "base": "jetfilmizle",
+    "www": false,
+    "marker": "JetFilmizle",
+    "test": {
+      "tmdbId": "550",
+      "type": "movie"
+    }
+  },
+  "castsinema-dizipal": {
+    "file": "providers/castsinema-dizipal.js",
+    "hostVar": "BASE",
+    "hostStyle": "single",
+    "base": "dizipal1595",
+    "www": false,
+    "marker": "DiziPal",
+    "test": {
+      "tmdbId": "550",
+      "type": "movie"
+    }
+  },
+  "castsinema-selcukflix": {
+    "file": "providers/castsinema-selcukflix.js",
+    "hostVar": "BASE",
+    "hostStyle": "single",
+    "base": "selcukflix",
+    "www": false,
+    "marker": "SelcukFlix",
+    "test": {
+      "tmdbId": "550",
+      "type": "movie"
+    }
+  },
+  "castsinema-ddizi": {
+    "file": "providers/castsinema-ddizi.js",
+    "hostVar": "BASE",
+    "hostStyle": "single",
+    "base": "www.ddizi",
+    "www": false,
+    "marker": "Ddizi",
+    "test": {
+      "tmdbId": "213194",
+      "type": "tv",
+      "season": 1,
+      "episode": 123
+    }
+  },
+  "castsinema-dizikorea3": {
+    "file": "providers/castsinema-dizikorea3.js",
+    "hostVar": "BASE",
+    "hostStyle": "single",
+    "base": "dizikorea3",
+    "www": false,
+    "marker": "Dizikorea3",
+    "test": {
+      "tmdbId": "316197",
+      "type": "tv",
+      "season": 1,
+      "episode": 1
+    }
+  },
+  "castsinema-sinemetrik": {
+    "file": "providers/castsinema-sinemetrik.js",
+    "hostVar": "BASE",
+    "hostStyle": "single",
+    "base": "www.sinemetrik",
+    "www": false,
+    "marker": "Sinemetrik",
+    "test": {
+      "tmdbId": "550",
+      "type": "movie"
+    }
+  },
+  "castsinema-webdramaturkey2": {
+    "file": "providers/castsinema-webdramaturkey2.js",
+    "hostVar": "BASE",
+    "hostStyle": "single",
+    "base": "webdramaturkey2",
+    "www": false,
+    "marker": "WebdramaTurkey2",
+    "test": {
+      "tmdbId": "218539",
+      "type": "tv",
+      "season": 1,
+      "episode": 1
+    }
+  },
+  "castsinema-tlctr": {
+    "file": "providers/castsinema-tlctr.js",
+    "hostVar": "BASE",
+    "hostStyle": "single",
+    "base": "www.tlctv",
+    "www": false,
+    "marker": "TLC",
+    "test": {
+      "tmdbId": "133445",
+      "type": "tv",
+      "season": 1,
+      "episode": 1
+    }
+  },
+  "castsinema-dmax": {
+    "file": "providers/castsinema-dmax.js",
+    "hostVar": "BASE",
+    "hostStyle": "single",
+    "base": "www.dmax",
+    "www": false,
+    "marker": "DMAX",
+    "test": {
+      "tmdbId": "34634",
+      "type": "tv",
+      "season": 15,
+      "episode": 1
+    }
+  },
+  "castsinema-yesilcamtv": {
+    "file": "providers/castsinema-yesilcamtv.js",
+    "hostVar": "BASE",
+    "hostStyle": "single",
+    "base": "yesilcamtv",
+    "www": false,
+    "marker": "YesilCamTv",
+    "test": {
+      "tmdbId": "1141480",
+      "type": "movie"
+    }
+  },
+  "castsinema-belgeselx": {
+    "file": "providers/castsinema-belgeselx.js",
+    "hostVar": "BASE",
+    "hostStyle": "single",
+    "base": "belgeselx",
+    "www": false,
+    "marker": "BelgeselX",
+    "test": {
+      "tmdbId": "287752",
+      "type": "tv",
+      "season": 1,
+      "episode": 1
+    }
+  },
+  "castsinema-puhutv": {
+    "file": "providers/castsinema-puhutv.js",
+    "hostVar": "BASE",
+    "hostStyle": "single",
+    "base": "puhutv",
+    "www": false,
+    "marker": "PuhuTV",
+    "test": {
+      "tmdbId": "77994",
+      "type": "tv",
+      "season": 1,
+      "episode": 1
+    }
+  },
+  "castsinema-rectv": {
+    "file": "providers/castsinema-rectv.js",
+    "hostVar": "CFG",
+    "hostStyle": "single",
+    "base": "rectv",
+    "www": false,
+    "marker": "RecTV",
+    "test": {
+      "tmdbId": "1396",
+      "type": "tv",
+      "season": 1,
+      "episode": 1
+    }
+  },
+  "castsinema-animecix": {
+    "file": "providers/castsinema-animecix.js",
+    "hostVar": "BASE",
+    "hostStyle": "single",
+    "base": "animecix",
+    "www": false,
+    "marker": "AnimeciX",
+    "test": {
+      "tmdbId": "95479",
+      "type": "tv",
+      "season": 1,
+      "episode": 1
+    }
+  },
+  "castsinema-anizium": {
+    "file": "providers/castsinema-anizium.js",
+    "hostVar": "BASE",
+    "hostStyle": "single",
+    "base": "anizium",
+    "www": false,
+    "marker": "Anizium",
+    "test": {
+      "tmdbId": "31910",
+      "type": "tv",
+      "season": 1,
+      "episode": 1
+    }
+  },
+  "castsinema-asyaanimeleri": {
+    "file": "providers/castsinema-asyaanimeleri.js",
+    "hostVar": "BASE",
+    "hostStyle": "single",
+    "base": "asyaanimeleri",
+    "www": false,
+    "marker": "AsyaAnimeleri",
+    "test": {
+      "tmdbId": "236534",
       "type": "tv",
       "season": 1,
       "episode": 1

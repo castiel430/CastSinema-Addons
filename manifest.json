@@ -1,13 +1,13 @@
 {
   "name": "CastSinema",
   "id": "castsinema",
-  "version": "1.6.0",
+  "version": "1.8.0",
   "scrapers": [
     {
       "id": "castsinema-boxfilm",
       "name": "CastSinema • BoxFilm",
-      "description": "BoxFilm JSON API tabanlı Türkçe dublaj film kazıyıcısı.",
-      "version": "1.0.0",
+      "description": "BoxFilm JSON API tabanlı Türkçe dublaj film kazıyıcısı (çoklu altyazı izleri).",
+      "version": "1.1.0",
       "author": "CastSinema",
       "supportedTypes": [
         "movie"
@@ -78,8 +78,8 @@
     {
       "id": "castsinema-xpass",
       "name": "CastSinema • Xpass",
-      "description": "CineStream Xpass doğrudan TMDB sağlayıcısı.",
-      "version": "1.0.0",
+      "description": "Xpass şifreli kaynak aynaları (AES-256-GCM /data çözümü, m3u8 aynaları).",
+      "version": "1.2.0",
       "author": "CastSinema",
       "supportedTypes": [
         "movie",
@@ -249,8 +249,8 @@
     {
       "id": "castsinema-webteizle",
       "name": "CastSinema • Webteizle",
-      "description": "Webteizle yerel HTML/JS film kazıyıcısı.",
-      "version": "1.0.0",
+      "description": "Webteizle Türkçe dublaj/altyazılı film kazıyıcısı (vidmoly, rubyhub, ok.ru).",
+      "version": "1.1.0",
       "author": "CastSinema",
       "supportedTypes": [
         "movie"
@@ -272,8 +272,8 @@
     {
       "id": "castsinema-sezonlukdizi",
       "name": "CastSinema • Sezonluk Dizi",
-      "description": "Sezonluk Dizi yerel HTML/JS dizi kazıyıcısı.",
-      "version": "1.0.0",
+      "description": "SezonlukDizi yabanci dizi arsivi (Filemoon korumali HLS + altyazi).",
+      "version": "1.1.0",
       "author": "CastSinema",
       "supportedTypes": [
         "tv"
@@ -320,11 +320,10 @@
     {
       "id": "castsinema-dizilla",
       "name": "CastSinema • Dizilla",
-      "description": "Dizilla Türkçe film ve dizi kazıyıcısı (pichive/NP_CONFIG).",
-      "version": "1.0.0",
+      "description": "Dizilla yabancı dizi arşivi (pichive NP_CONFIG player, HLS + altyazı).",
+      "version": "1.1.0",
       "author": "CastSinema",
       "supportedTypes": [
-        "movie",
         "tv"
       ],
       "filename": "providers/castsinema-dizilla.js",
@@ -406,6 +405,385 @@
       "contentLanguage": [
         "tr",
         "en"
+      ],
+      "formats": [
+        "m3u8"
+      ],
+      "limited": false,
+      "disabledPlatforms": [],
+      "supportsExternalPlayer": true
+    },
+    {
+      "id": "castsinema-jetfilmizle",
+      "name": "CastSinema • JetFilmizle",
+      "description": "JetFilmizle Türkçe dublaj/altyazılı film arşivi (godrive + videopark HLS).",
+      "version": "1.0.0",
+      "author": "CastSinema",
+      "supportedTypes": [
+        "movie"
+      ],
+      "filename": "providers/castsinema-jetfilmizle.js",
+      "enabled": true,
+      "hasSettings": false,
+      "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",
+      "contentLanguage": [
+        "tr"
+      ],
+      "formats": [
+        "m3u8",
+        "mp4"
+      ],
+      "limited": false,
+      "disabledPlatforms": [],
+      "supportsExternalPlayer": true
+    },
+    {
+      "id": "castsinema-dizipal",
+      "name": "CastSinema • DiziPal",
+      "description": "DiziPal Türkçe dizi ve film arşivi (PBKDF2 + AES player token, m3u8 master).",
+      "version": "1.0.0",
+      "author": "CastSinema",
+      "supportedTypes": [
+        "movie",
+        "tv"
+      ],
+      "filename": "providers/castsinema-dizipal.js",
+      "enabled": true,
+      "hasSettings": false,
+      "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",
+      "contentLanguage": [
+        "tr"
+      ],
+      "formats": [
+        "m3u8"
+      ],
+      "limited": false,
+      "disabledPlatforms": [],
+      "supportsExternalPlayer": true
+    },
+    {
+      "id": "castsinema-selcukflix",
+      "name": "CastSinema • SelcukFlix",
+      "description": "SelcukFlix Türkçe dublaj/altyazılı film ve diziler (şifreli player token, m3u8).",
+      "version": "1.0.0",
+      "author": "CastSinema",
+      "supportedTypes": [
+        "movie",
+        "tv"
+      ],
+      "filename": "providers/castsinema-selcukflix.js",
+      "enabled": true,
+      "hasSettings": false,
+      "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",
+      "contentLanguage": [
+        "tr"
+      ],
+      "formats": [
+        "m3u8"
+      ],
+      "limited": false,
+      "disabledPlatforms": [],
+      "supportsExternalPlayer": true
+    },
+    {
+      "id": "castsinema-ddizi",
+      "name": "CastSinema • Ddizi",
+      "description": "Ddizi yerli dizi arşivi (tabii kaynaklı MP4/HLS bölümler).",
+      "version": "1.0.0",
+      "author": "CastSinema",
+      "supportedTypes": [
+        "tv"
+      ],
+      "filename": "providers/castsinema-ddizi.js",
+      "enabled": true,
+      "hasSettings": false,
+      "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",
+      "contentLanguage": [
+        "tr"
+      ],
+      "formats": [
+        "mp4",
+        "m3u8"
+      ],
+      "limited": false,
+      "disabledPlatforms": [],
+      "supportsExternalPlayer": true
+    },
+    {
+      "id": "castsinema-dizikorea3",
+      "name": "CastSinema • Dizikorea3",
+      "description": "Dizikorea3 Kore dizileri arşivi (HLS + Türkçe altyazı).",
+      "version": "1.0.0",
+      "author": "CastSinema",
+      "supportedTypes": [
+        "tv"
+      ],
+      "filename": "providers/castsinema-dizikorea3.js",
+      "enabled": true,
+      "hasSettings": false,
+      "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",
+      "contentLanguage": [
+        "tr"
+      ],
+      "formats": [
+        "m3u8"
+      ],
+      "limited": false,
+      "disabledPlatforms": [],
+      "supportsExternalPlayer": true
+    },
+    {
+      "id": "castsinema-sinemetrik",
+      "name": "CastSinema • Sinemetrik",
+      "description": "Sinemetrik film/dizi kaynakları (kendi player akışları, TR altyazı).",
+      "version": "1.0.0",
+      "author": "CastSinema",
+      "supportedTypes": [
+        "movie",
+        "tv"
+      ],
+      "filename": "providers/castsinema-sinemetrik.js",
+      "enabled": true,
+      "hasSettings": false,
+      "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",
+      "contentLanguage": [
+        "tr"
+      ],
+      "formats": [
+        "m3u8",
+        "mp4"
+      ],
+      "limited": false,
+      "disabledPlatforms": [],
+      "supportsExternalPlayer": true
+    },
+    {
+      "id": "castsinema-webdramaturkey2",
+      "name": "CastSinema • WebdramaTurkey2",
+      "description": "WebdramaTurkey2 Kore/Çin/Japon dizileri ve filmleri (Türkçe altyazılı HLS).",
+      "version": "1.0.0",
+      "author": "CastSinema",
+      "supportedTypes": [
+        "movie",
+        "tv"
+      ],
+      "filename": "providers/castsinema-webdramaturkey2.js",
+      "enabled": true,
+      "hasSettings": false,
+      "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",
+      "contentLanguage": [
+        "tr"
+      ],
+      "formats": [
+        "m3u8"
+      ],
+      "limited": false,
+      "disabledPlatforms": [],
+      "supportsExternalPlayer": true
+    },
+    {
+      "id": "castsinema-tlctr",
+      "name": "CastSinema • TLC Türkiye",
+      "description": "TLC Türkiye program arşivi (imzalı DYG HLS akışları).",
+      "version": "1.0.0",
+      "author": "CastSinema",
+      "supportedTypes": [
+        "tv"
+      ],
+      "filename": "providers/castsinema-tlctr.js",
+      "enabled": true,
+      "hasSettings": false,
+      "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",
+      "contentLanguage": [
+        "tr"
+      ],
+      "formats": [
+        "m3u8"
+      ],
+      "limited": false,
+      "disabledPlatforms": [],
+      "supportsExternalPlayer": true
+    },
+    {
+      "id": "castsinema-dmax",
+      "name": "CastSinema • DMAX",
+      "description": "DMAX Türkiye program arşivi (player/info HLS adresleri).",
+      "version": "1.0.0",
+      "author": "CastSinema",
+      "supportedTypes": [
+        "tv"
+      ],
+      "filename": "providers/castsinema-dmax.js",
+      "enabled": true,
+      "hasSettings": false,
+      "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",
+      "contentLanguage": [
+        "tr"
+      ],
+      "formats": [
+        "m3u8"
+      ],
+      "limited": false,
+      "disabledPlatforms": [],
+      "supportsExternalPlayer": true
+    },
+    {
+      "id": "castsinema-yesilcamtv",
+      "name": "CastSinema • Yeşilçam TV",
+      "description": "Yeşilçam TV klasik Türk filmleri (Rumble HLS kaliteleri ve doğrudan MP4).",
+      "version": "1.0.0",
+      "author": "CastSinema",
+      "supportedTypes": [
+        "movie"
+      ],
+      "filename": "providers/castsinema-yesilcamtv.js",
+      "enabled": true,
+      "hasSettings": false,
+      "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",
+      "contentLanguage": [
+        "tr"
+      ],
+      "formats": [
+        "m3u8",
+        "mp4"
+      ],
+      "limited": false,
+      "disabledPlatforms": [],
+      "supportsExternalPlayer": true
+    },
+    {
+      "id": "castsinema-belgeselx",
+      "name": "CastSinema • BelgeselX",
+      "description": "BelgeselX Türkçe belgesel dizileri (ok.ru ve CDN MP4 kaynakları).",
+      "version": "1.0.0",
+      "author": "CastSinema",
+      "supportedTypes": [
+        "tv"
+      ],
+      "filename": "providers/castsinema-belgeselx.js",
+      "enabled": true,
+      "hasSettings": false,
+      "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",
+      "contentLanguage": [
+        "tr"
+      ],
+      "formats": [
+        "mp4"
+      ],
+      "limited": false,
+      "disabledPlatforms": [],
+      "supportsExternalPlayer": true
+    },
+    {
+      "id": "castsinema-puhutv",
+      "name": "CastSinema • PuhuTV",
+      "description": "PuhuTV yerli dizi, orijinal yapımlar ve filmler (DYG HLS akışları).",
+      "version": "1.0.0",
+      "author": "CastSinema",
+      "supportedTypes": [
+        "movie",
+        "tv"
+      ],
+      "filename": "providers/castsinema-puhutv.js",
+      "enabled": true,
+      "hasSettings": false,
+      "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",
+      "contentLanguage": [
+        "tr"
+      ],
+      "formats": [
+        "m3u8"
+      ],
+      "limited": false,
+      "disabledPlatforms": [],
+      "supportsExternalPlayer": true
+    },
+    {
+      "id": "castsinema-rectv",
+      "name": "CastSinema • RecTV",
+      "description": "RecTV imzalı resmî API film ve dizi kataloğu (attest/nonce + HMAC-SHA256, token'lı m3u8).",
+      "version": "1.0.0",
+      "author": "CastSinema",
+      "supportedTypes": [
+        "movie",
+        "tv"
+      ],
+      "filename": "providers/castsinema-rectv.js",
+      "enabled": true,
+      "hasSettings": false,
+      "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",
+      "contentLanguage": [
+        "tr",
+        "en"
+      ],
+      "formats": [
+        "m3u8"
+      ],
+      "limited": false,
+      "disabledPlatforms": [],
+      "supportsExternalPlayer": true
+    },
+    {
+      "id": "castsinema-animecix",
+      "name": "CastSinema • AnimeciX",
+      "description": "AnimeciX Türkçe altyazılı anime arşivi (MP4 akışları).",
+      "version": "1.0.0",
+      "author": "CastSinema",
+      "supportedTypes": [
+        "tv"
+      ],
+      "filename": "providers/castsinema-animecix.js",
+      "enabled": true,
+      "hasSettings": false,
+      "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",
+      "contentLanguage": [
+        "tr"
+      ],
+      "formats": [
+        "mp4"
+      ],
+      "limited": false,
+      "disabledPlatforms": [],
+      "supportsExternalPlayer": true
+    },
+    {
+      "id": "castsinema-anizium",
+      "name": "CastSinema • Anizium",
+      "description": "Anizium anime arşivi (Türkçe altyazılı MP4 akışları).",
+      "version": "1.0.0",
+      "author": "CastSinema",
+      "supportedTypes": [
+        "tv"
+      ],
+      "filename": "providers/castsinema-anizium.js",
+      "enabled": true,
+      "hasSettings": false,
+      "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",
+      "contentLanguage": [
+        "tr"
+      ],
+      "formats": [
+        "mp4"
+      ],
+      "limited": false,
+      "disabledPlatforms": [],
+      "supportsExternalPlayer": true
+    },
+    {
+      "id": "castsinema-asyaanimeleri",
+      "name": "CastSinema • AsyaAnimeleri",
+      "description": "AsyaAnimeleri anime kaynakları (rumble ve vidmoly HLS).",
+      "version": "1.0.0",
+      "author": "CastSinema",
+      "supportedTypes": [
+        "tv"
+      ],
+      "filename": "providers/castsinema-asyaanimeleri.js",
+      "enabled": true,
+      "hasSettings": false,
+      "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",
+      "contentLanguage": [
+        "tr"
       ],
       "formats": [
         "m3u8"

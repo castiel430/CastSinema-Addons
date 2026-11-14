@@ -54,9 +54,29 @@ yayınlayamazsınız.
 | **DiziBal** | `dizibal.org` | film + dizi | ✅ çalışıyor (HLS + altyazı) |
 | **DiziPod** | `dizipod.com` | dizi | ✅ çalışıyor (HLS) |
 | **DiziYou** | `www.diziyou.one` | film + dizi | ✅ çalışıyor (HLS + altyazı) |
+| **JetFilmizle** | `jetfilmizle.app` | film | ✅ çalışıyor (godrive + videopark) |
+| **Ddizi** | `www.ddizi.tel` | dizi | ✅ çalışıyor (MP4/HLS) |
+| **Dizikorea3** | `dizikorea3.com` | dizi | ✅ çalışıyor (HLS + altyazı) |
+| **Sinemetrik** | `www.sinemetrik.com` | film + dizi | ✅ çalışıyor (HLS + altyazı) |
+| **WebdramaTurkey2** | `webdramaturkey2.com` | film + dizi | ✅ çalışıyor (HLS + altyazı) |
+| **TLC Türkiye** | `www.tlctv.com.tr` | dizi | ✅ çalışıyor (imzalı DYG HLS) |
+| **DMAX** | `www.dmax.com.tr` | dizi | ✅ çalışıyor (HLS) |
+| **Yeşilçam TV** | `yesilcamtv.com.tr` | film | ✅ çalışıyor (Rumble HLS + MP4) |
+| **BelgeselX** | `belgeselx.com` | dizi | ✅ çalışıyor (MP4) |
+| **PuhuTV** | `puhutv.com` | film + dizi | ✅ çalışıyor (DYG HLS + altyazı) |
+| **RecTV** | `rectv.org.tr` | film + dizi | ✅ çalışıyor (imzalı API, HLS) |
+| **AnimeciX** | `animecix.tv` | dizi (anime) | ✅ çalışıyor (MP4) |
+| **Anizium** | `anizium.co` | dizi (anime) | ✅ çalışıyor (MP4 + altyazı) |
+| **AsyaAnimeleri** | `asyaanimeleri.top` | dizi (anime) | ✅ çalışıyor (HLS) |
+| **DiziPal** | `dizipal1595.com` | film + dizi | ⚠️ Cloudflare (CI ağını 403'lüyor) |
+| **SelcukFlix** | `selcukflix.app` | film + dizi | ⚠️ Cloudflare (CI ağını 403'lüyor) |
+| **Dizilla** | `dizilla.la` | dizi | ⚠️ Cloudflare (CI ağını 403'lüyor) |
+| **Webteizle** | `webteizle.info` | film | ⚠️ Cloudflare (CI ağını 403'lüyor) |
 
-17 provider. Durumlar `tools/domain_watch.py` tarafından canlı olarak
-doğrulanır (aşağıya bakın).
+33 provider. Durumlar `tools/domain_watch.py` tarafından canlı olarak
+doğrulanır (aşağıya bakın). Cloudflare uyarısı alan provider'lar, çalışan kod
+yoluna sahiptir ancak bu deponun test çıkış IP'si site WAF'ı tarafından
+engellenir; ev/telefon ağından normal şekilde çalışırlar.
 
 > **Durum tablosu zamanla eskir.** Güncel tabloyu
 > `reports/domain-watch-<tarih>.md` dosyasından veya
@@ -73,7 +93,14 @@ doğrulanır (aşağıya bakın).
 | **FullHDFilmizlesene** | Yalnızca film. Kaynak adresleri sayfadaki `scx` nesnesinde ROT13 + base64 (veya `v2.` varyantı) ile gizlenir; provider bunları çözer, ardından `rapidvid` oynatıcısındaki şifreli manifestten HLS master + altyazı elde eder. |
 | **BoxFilm** | JSON arama API'si sunucu tarafında **Türkçe** başlıklarla eşleşiyor; küçük bir katalog (~120 film) var ve doğrudan m3u8 veriyor. |
 | **Webteizle** | Arama formu `?q=` üzerinden çalışır; IMDb id'leri poster URL'lerinde bulunur. Player code base64-reversed ile çözülür. |
-| **Sezonluk Dizi** | Arama `/ara?q=` üzerinden JSON döner; bölüm sayfaları player code ile çalışır. |
+| **Sezonluk Dizi** | Arama `/ara?q=` üzerinden JSON döner; bölüm sayfaları player code ile çalışır. Filemoon oynatıcısı ECDSA/PoW attestation ister; provider saf JS SHA-256/AES-GCM ile bunu üretir. |
+| **Xpass** | Oynatıcı sayfası `/data/...` gövdesini AES-256-GCM ile şifreler. Anahtar `SHA-256("spv3-data-response\|<salt>\|<path>\|<token>")`; salt çalışma anında oynatıcı bundle'ından okunur. İlk 12 ayna okunur (zaman aşımı 8 sn). |
+| **BoxFilm** | HLS CDN yalnızca `Referer` = `boxload.xyz/boxes/<id>` oynatıcı sayfası olduğunda yanıt verir; provider bu başlığı ve `Origin`'i gönderir. Oyuncu config'inden Türkçe/İngilizce/zorunlu altyazı izleri de çıkarılır. |
+| **JetFilmizle** | `POST /jetplayer` → iframe → godrive (çoklu kalite MP4) ve videopark apollo (HLS) çözücüleri. Kaynak etiketi TR Dublaj/Altyazılı olarak korunur. |
+| **Ddizi** | Bölümler tabii CDN'inden çoklu kalite MP4 olarak gelir. |
+| **RecTV** | Resmî API attest/nonce + HMAC-SHA256 imzası ister; token'lı m3u8 döner. |
+| **PuhuTV / TLC / DMAX** | DYG (NTV) altyapısı: `player/info` ucu imzalı HLS adresi verir. |
+| **Yeşilçam TV** | Rumble embed'inden kalite başına HLS (`r_file=chunklist.m3u8`) ve doğrudan MP4 kaynakları çıkarılır. |
 
 ---
 
@@ -162,8 +189,8 @@ her 6 saatte bir otomatik çalışacak şekilde tanımlıdır:
 
 ```text
 CastSinema/
-├── manifest.json           # 17 scraper tanımı
-├── providers/              # 17 provider JS dosyası
+├── manifest.json           # 33 scraper tanımı
+├── providers/              # 33 provider JS dosyası
 ├── assets/logo.png         # picker logosu
 ├── scripts/
 │   ├── validate.mjs        # manifest + provider doğrulaması
@@ -175,7 +202,7 @@ CastSinema/
 │   ├── run_provider.mjs    # provider'ı canlı siteye karşı çalıştıran koşum
 │   ├── providers.json      # provider başına test vakası ve host listesi
 │   └── requirements.txt
-├── tests/providers.test.mjs   # 16 birim testi
+├── tests/providers.test.mjs   # 20 birim testi
 └── docs/
     ├── ARCHITECTURE.md
     ├── BRANDING.md
@@ -188,7 +215,7 @@ CastSinema/
 
 | Komut | Ne yapar |
 |---|---|
-| `npm test` | Doğrulama + 16 birim test |
+| `npm test` | Doğrulama + 20 birim test |
 | `npm run validate` | Yalnızca statik kontroller |
 | `npm run set-repo -- <user> <repo>` | Kurulum adreslerini günceller |
 | `npm run github:setup -- [repo]` | Repo oluşturur, push eder, yayını doğrular |
@@ -217,7 +244,7 @@ CastSinema / Stremio. Each provider reads a site's HTML or API and fulfils the
 `getStreams(tmdbId, mediaType, season, episode)` contract.
 
 ```bash
-npm test                                        # validate + 16 unit tests
+npm test                                        # validate + 20 unit tests
 node scripts/set-repo.mjs <user> <repo>         # set your GitHub coordinates
 python tools/domain_watch.py                    # scan domains and test live
 ```
@@ -249,3 +276,23 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the provider contract,
 | **Webteizle** | `webteizle.info` | movie |
 | **Sezonluk Dizi** | `sezonlukdizi.cc` | series |
 | **DiziFilmizle** | `dizifilmizle.to` | movie + series |
+| **DiziBal** | `dizibal.org` | movie + series |
+| **DiziPod** | `dizipod.com` | series |
+| **DiziYou** | `www.diziyou.one` | movie + series |
+| **JetFilmizle** | `jetfilmizle.app` | movie |
+| **Ddizi** | `www.ddizi.tel` | series |
+| **Dizikorea3** | `dizikorea3.com` | series |
+| **Sinemetrik** | `www.sinemetrik.com` | movie + series |
+| **WebdramaTurkey2** | `webdramaturkey2.com` | movie + series |
+| **TLC Türkiye** | `www.tlctv.com.tr` | series |
+| **DMAX** | `www.dmax.com.tr` | series |
+| **Yeşilçam TV** | `yesilcamtv.com.tr` | movie |
+| **BelgeselX** | `belgeselx.com` | series |
+| **PuhuTV** | `puhutv.com` | movie + series |
+| **RecTV** | `rectv.org.tr` | movie + series |
+| **AnimeciX** | `animecix.tv` | series (anime) |
+| **Anizium** | `anizium.co` | series (anime) |
+| **AsyaAnimeleri** | `asyaanimeleri.top` | series (anime) |
+| **DiziPal** | `dizipal1595.com` | movie + series (Cloudflare WAF) |
+| **SelcukFlix** | `selcukflix.app` | movie + series (Cloudflare WAF) |
+| **Dizilla** | `dizilla.la` | series (Cloudflare WAF) |
