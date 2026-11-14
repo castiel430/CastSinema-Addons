@@ -5,6 +5,15 @@ All notable changes to CastSinema-Addons will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/tr/).
 
+## [1.9.0] - 2026-11-14
+
+### Added
+- **IzleFilm** (`izlefilm.net`) provider: arama → film sayfası → ok.ru embed →
+  `ondemandHls` master m3u8. Türkçe dublaj HLS akışı.
+
+### Changed
+- Manifest sürümü `1.9.0`, **34 provider**.
+
 ## [1.8.0] - 2026-11-14
 
 ### Added

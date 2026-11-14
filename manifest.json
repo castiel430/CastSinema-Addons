@@ -1,7 +1,7 @@
 {
   "name": "CastSinema",
   "id": "castsinema",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "scrapers": [
     {
       "id": "castsinema-boxfilm",
@@ -779,6 +779,29 @@
         "tv"
       ],
       "filename": "providers/castsinema-asyaanimeleri.js",
+      "enabled": true,
+      "hasSettings": false,
+      "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",
+      "contentLanguage": [
+        "tr"
+      ],
+      "formats": [
+        "m3u8"
+      ],
+      "limited": false,
+      "disabledPlatforms": [],
+      "supportsExternalPlayer": true
+    },
+    {
+      "id": "castsinema-izlefilm",
+      "name": "CastSinema • IzleFilm",
+      "description": "IzleFilm Türkçe dublaj film arşivi (ok.ru embed → HLS).",
+      "version": "1.0.0",
+      "author": "CastSinema",
+      "supportedTypes": [
+        "movie"
+      ],
+      "filename": "providers/castsinema-izlefilm.js",
       "enabled": true,
       "hasSettings": false,
       "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",

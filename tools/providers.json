@@ -430,5 +430,17 @@
       "season": 1,
       "episode": 1
     }
+  },
+  "castsinema-izlefilm": {
+    "file": "providers/castsinema-izlefilm.js",
+    "hostVar": "HOST",
+    "hostStyle": "single",
+    "base": "izlefilm",
+    "www": false,
+    "marker": "IzleFilm",
+    "test": {
+      "tmdbId": "931285",
+      "type": "movie"
+    }
   }
 }

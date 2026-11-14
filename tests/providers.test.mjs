@@ -496,3 +496,29 @@ test('YesilCam TV provider labels query-string HLS mirrors as m3u8', async () =>
   assert.ok(streams[0].quality.startsWith('1080p'));
   assert.ok(streams[0].url.includes('chunklist.m3u8'));
 });
+
+test('IzleFilm provider resolves an ok.ru embed into an HLS master', async () => {
+  const hls = 'https://ok6-29.vkuser.net/expires/1794737851371/clientType/0/srcIp/46.197.29.53/type/2/mid/15345032890985/id/17723517373033/ms/95.142.206.33/zs/65/srcAg/CHROME/urls/185.180.203.46%3B176.112.172.39/pr/10/ct/28/sig/qsbVk2op6nQ/ondemand/hls4_17723517373033.COmU8NnMvgNA6Yz9sr4aUAq6Aiy3oj5Fmg.m3u8';
+  const dataOptions = JSON.stringify({
+    flashvars: {
+      metadata: {
+        movie: { title: 'Mortal Kombat II' },
+        ondemandHls: hls
+      }
+    }
+  }).replace(/"/g, '&quot;');
+  const provider = await loadProvider('providers/castsinema-izlefilm.js', async (url) => {
+    const u = String(url);
+    if (u.includes('/movie/931285')) return response({ json: { title: 'Mortal Kombat II', original_title: 'Mortal Kombat II' } });
+    if (u.includes('/arama?q=')) return response({ text: '<a href="/film/mortal-kombat-ii">Mortal Kombat II</a>' });
+    if (u.includes('/film/mortal-kombat-ii')) return response({ text: '<iframe data-player-url="https://ok.ru/videoembed/15345032890985?nochat=1"></iframe>' });
+    if (u.includes('ok.ru/videoembed/')) return response({ text: '<div data-options="' + dataOptions + '"></div>' });
+    return response({ ok: false });
+  });
+  const streams = await provider.getStreams('931285', 'movie', null, null);
+  assert.equal(streams.length, 1);
+  assert.equal(streams[0].provider, 'castsinema-izlefilm');
+  assert.equal(streams[0].format, 'm3u8');
+  assert.equal(streams[0].url, hls);
+  assert.ok(streams[0].title.includes('TR Dublaj'));
+});
