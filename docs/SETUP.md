@@ -99,10 +99,6 @@ provider eklediyseniz `manifest.json`'ı da aynı commit'te güncelleyin.
 > **Not:** `manifest.json` değiştiğinde CastSinema/Stremio istemcisi yeni sürümü
 > ancak bir sonraki açılışta veya manuel yenileme ile alır.
 
-> **Gizli kurulum:** Repoyu private tutup addon'u yine çalıştırmak için
-> [`PRIVATE-HOSTING.md`](PRIVATE-HOSTING.md)'ye bakın (Cloudflare Worker + KV +
-> gizli yol).
-
 ---
 
 ## 5. Bakım

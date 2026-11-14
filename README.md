@@ -21,10 +21,9 @@ https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/manifest.jso
 > Bir provider dosya adı değiştiyse addon'u kaldırıp **yeniden ekleyin** ki güncel
 > manifest çekilsin.
 
-> **Repo public kalmalıdır** (varsayılan kurulum). Addon, manifesti ve provider'ları
+> **Repo public kalmalıdır.** Addon, manifesti ve provider'ları
 > `raw.githubusercontent.com` üzerinden **anonim** (kimlik bilgisi olmadan) çeker.
-> Repoyu **private** yapmak istiyorsanız gizli kurulum kullanın →
-> [`docs/PRIVATE-HOSTING.md`](docs/PRIVATE-HOSTING.md)
+> Repo **private** yaparsanız o URL'ler **404** döner ve addon çalışmaz.
 
 Depoyu kendi hesabınıza taşıyorsanız:
 
@@ -192,14 +191,6 @@ her 6 saatte bir otomatik çalışacak şekilde tanımlıdır:
 
 ---
 
-## Gizli kurulum (opsiyonel)
-
-Repoyu **private** tutup addon'u yine de çalıştırmak isterseniz (anonim HTTP +
-gizli yol üzerinden dağıtım), Cloudflare Worker + KV kurulumu kullanın →
-[`docs/PRIVATE-HOSTING.md`](docs/PRIVATE-HOSTING.md)
-
----
-
 ## Depo haritası
 
 ```text
@@ -270,8 +261,9 @@ Install URL:
 https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/manifest.json
 ```
 
-> The repository must stay **public** for the default install URL (`raw.githubusercontent.com`
-> anonymous access). For a private-repo setup see [`docs/PRIVATE-HOSTING.md`](docs/PRIVATE-HOSTING.md).
+> The repository must stay **public**. The addon fetches the manifest and providers
+> from `raw.githubusercontent.com` anonymously — making the repo private breaks the
+> install (everything returns 404).
 
 See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the provider contract,
 [`docs/BRANDING.md`](docs/BRANDING.md) for hardcoded credentials and

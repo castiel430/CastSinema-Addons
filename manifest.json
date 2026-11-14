@@ -1,7 +1,7 @@
 {
   "name": "CastSinema",
   "id": "castsinema",
-  "version": "1.9.5",
+  "version": "1.9.4",
   "scrapers": [
     {
       "id": "castsinema-boxfilm",
