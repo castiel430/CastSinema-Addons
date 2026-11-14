@@ -6,7 +6,8 @@
   "scripts": {
     "test": "npm run validate && node --test tests/*.test.mjs",
     "validate": "node scripts/validate.mjs",
-    "set-repo": "node scripts/set-repo.mjs"
+    "set-repo": "node scripts/set-repo.mjs",
+    "github:setup": "node scripts/github-setup.mjs"
   },
   "license": "MIT",
   "author": "CastSinema"

@@ -92,6 +92,10 @@ git push
 Raw URL'ler GitHub'ın CDN'inde birkaç saniye içinde yenilenir. Yeni bir
 provider eklediyseniz `manifest.json`'ı da aynı commit'te güncelleyin.
 
+> **Önemli:** Repo **public** kalmalıdır. Addon, manifest ve provider'ları
+> `raw.githubusercontent.com` üzerinden **anonim** (kimlik bilgisi olmadan) çeker;
+> private repo yapılırsa URL'ler **404** döner ve addon çalışmaz.
+
 > **Not:** `manifest.json` değiştiğinde CastSinema/Stremio istemcisi yeni sürümü
 > ancak bir sonraki açılışta veya manuel yenileme ile alır.
 
@@ -104,7 +108,7 @@ provider eklediyseniz `manifest.json`'ı da aynı commit'te güncelleyin.
 İlgili provider dosyasındaki `HOST` sabitini güncelleyin:
 
 ```js
-var HOST = "https://filmmodu.cc";
+var HOST = "https://filmmodu.news";
 ```
 
 Ardından:
@@ -165,7 +169,7 @@ Stream `name` alanını `CastSinema • <Kaynak>` biçiminde yazın.
 2. Site yapısı değişmiş olabilir — regex'i güncelleyin
 3. CastSinema loglarında provider'ın `console.error` çıktısını arayın
 4. Site CAPTCHA'ya geçiş olabilir — `dizibox` bunu tespit edip hata verir
-5. Cloudflare WAF engeli olabilir (webteizle, dizipal, selcukflix) — tarayıcıdan doğrulayın
+5. Cloudflare WAF engeli olabilir (webteizle, dizipal, selcukflix, dizilla) — tarayıcıdan doğrulayın
 
 ### Logo görünmüyor
 

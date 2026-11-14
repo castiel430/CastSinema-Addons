@@ -17,10 +17,13 @@ Sunucu yoktur, derleme adımı yoktur — `git push` yeterlidir.
 https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/manifest.json
 ```
 
-> **Uygulamada ilk eklemeden sonra**: manifesti uygulama kurulumda **saklıyor**. İlk
-eklemeden sonra: manifesti CastSinema kurulumda **saklıyor**. İlk
-ekleme sırasında bir dosya adı değiştiyse, addon'u kaldırıp **yeniden ekleyin**
-ki güncel manifest çekilsin.
+> **Uygulamada ilk eklemeden sonra**: CastSinema manifesti kurulumda **saklıyor**.
+> Bir provider dosya adı değiştiyse addon'u kaldırıp **yeniden ekleyin** ki güncel
+> manifest çekilsin.
+
+> **Repo public kalmalıdır.** Addon, manifesti ve provider'ları
+> `raw.githubusercontent.com` üzerinden **anonim** (kimlik bilgisi olmadan) çeker.
+> Repo **private** yaparsanız o URL'ler **404** döner ve addon çalışmaz.
 
 Depoyu kendi hesabınıza taşıyorsanız:
 
@@ -41,14 +44,13 @@ yayınlayamazsınız.
 | **DiziBox** | `www.dizibox.live` | dizi | ✅ çalışıyor |
 | **ClipBox** | `vixsrc.to` | film + dizi | ✅ çalışıyor |
 | **Xpass** | `play.xpass.top` | film + dizi | ✅ çalışıyor |
-| **FilmModu** | `filmmodu.cc` | film | ✅ çalışıyor |
+| **FilmModu** | `filmmodu.news` | film | ✅ çalışıyor |
 | **DiziMom** | `ddizimom.net` | dizi | ✅ çalışıyor |
 | **SetFilmIzle** | `www.setfilmizle.ltd` | film + dizi | ✅ çalışıyor |
 | **BoxFilm** | `boxfilm.net` | film | ✅ çalışıyor (~120 film) |
 | **FullHDFilmizlesene** | `www.fullhdfilmizlesene.now` | film | ✅ çalışıyor (HLS + altyazı) |
 | **FilmMakinesi** | `filmmakinesi.co` | film | ✅ çalışıyor (küçük katalog) |
 | **HDFilmCehennemi** | `www.hdfilmcehennemi.nl` | film + dizi | ✅ çalışıyor (HLS + altyazı) |
-| **Webteizle** | `webteizle.info` | film | ✅ çalışıyor |
 | **Sezonluk Dizi** | `sezonlukdizi.cc` | dizi | ✅ çalışıyor |
 | **DiziFilmizle** | `dizifilmizle.to` | film + dizi | ✅ çalışıyor |
 | **DiziBal** | `dizibal.org` | film + dizi | ✅ çalışıyor (HLS + altyazı) |
@@ -81,9 +83,8 @@ doğrulanır (aşağıya bakın). Cloudflare uyarısı alan provider'lar, çalı
 yoluna sahiptir ancak bu deponun test çıkış IP'si site WAF'ı tarafından
 engellenir; ev/telefon ağından normal şekilde çalışırlar.
 
-> **Durum tablosu zamanla eskir.** Güncel tabloyu
-> `reports/domain-watch-<tarih>.md` dosyasından veya
-> `python tools/domain_watch.py` çalıştırarak görün.
+> **Durum tablosu zamanla eskir.** Güncel durumu `python tools/domain_watch.py`
+> çalıştırarak görün; rapor `reports/` klasörüne yazılır (git'e eklenmez).
 
 ### Siteye özel notlar
 
@@ -94,16 +95,18 @@ engellenir; ev/telefon ağından normal şekilde çalışırlar.
 | **FilmMakinesi** | Canlı arama ucu `/?knl_ajax_search=1&s=` üzerinden çalışır (tema JS'inin kullandığı uç). Film sayfasındaki `oynatloload.top` oynatıcısı, sayfadaki `__ULTRA_EAUTH` jetonu ile `/api/video-bilgi/<id>` ucundan **HLS master + Türkçe .vtt** döndürür. Sitenin kataloğu küçük olduğu için sitede yayınlanmayan bir başlık için sonuç çıkmaz. |
 | **HDFilmCehennemi** | Arama `/search/?q=` üzerinden JSON döner (`X-Requested-With: fetch` zorunlu). Oynatıcı `hdfilmcehennemi.mobi` yalnızca **oynatıcı istemcilerine** (okhttp/ExoPlayer) yanıt verir; manifest şifreli olarak gelir ve saf JS ile çözülür. Dizi sayfasından bölüm linki bulunur, bölüm sayfasındaki oynatıcıdan HLS + altyazı çıkarılır. |
 | **FullHDFilmizlesene** | Yalnızca film. Kaynak adresleri sayfadaki `scx` nesnesinde ROT13 + base64 (veya `v2.` varyantı) ile gizlenir; provider bunları çözer, ardından `rapidvid` oynatıcısındaki şifreli manifestten HLS master + altyazı elde eder. |
-| **BoxFilm** | JSON arama API'si sunucu tarafında **Türkçe** başlıklarla eşleşiyor; küçük bir katalog (~120 film) var ve doğrudan m3u8 veriyor. |
+| **BoxFilm** | JSON arama API'si sunucu tarafında **Türkçe** başlıklarla eşleşir; küçük bir katalog (~120 film) vardır ve doğrudan m3u8 veriyor. HLS CDN yalnızca `Referer` = `boxload.xyz/boxes/<id>` oynatıcı sayfası olduğunda yanıt verir; provider bu başlığı ve `Origin`'i gönderir; oyuncu config'inden Türkçe/İngilizce/zorunlu altyazı izleri çıkarılır. |
 | **Webteizle** | Arama formu `?q=` üzerinden çalışır; IMDb id'leri poster URL'lerinde bulunur. Player code base64-reversed ile çözülür. |
 | **Sezonluk Dizi** | Arama `/ara?q=` üzerinden JSON döner; bölüm sayfaları player code ile çalışır. Filemoon oynatıcısı ECDSA/PoW attestation ister; provider saf JS SHA-256/AES-GCM ile bunu üretir. |
 | **Xpass** | Oynatıcı sayfası `/data/...` gövdesini AES-256-GCM ile şifreler. Anahtar `SHA-256("spv3-data-response\|<salt>\|<path>\|<token>")`; salt çalışma anında oynatıcı bundle'ından okunur. İlk 12 ayna okunur (zaman aşımı 8 sn). |
-| **BoxFilm** | HLS CDN yalnızca `Referer` = `boxload.xyz/boxes/<id>` oynatıcı sayfası olduğunda yanıt verir; provider bu başlığı ve `Origin`'i gönderir. Oyuncu config'inden Türkçe/İngilizce/zorunlu altyazı izleri de çıkarılır. |
 | **JetFilmizle** | `POST /jetplayer` → iframe → godrive (çoklu kalite MP4) ve videopark apollo (HLS) çözücüleri. Kaynak etiketi TR Dublaj/Altyazılı olarak korunur. |
 | **Ddizi** | Bölümler tabii CDN'inden çoklu kalite MP4 olarak gelir. |
 | **RecTV** | Resmî API attest/nonce + HMAC-SHA256 imzası ister; token'lı m3u8 döner. |
 | **PuhuTV / TLC / DMAX** | DYG (NTV) altyapısı: `player/info` ucu imzalı HLS adresi verir. |
 | **Yeşilçam TV** | Rumble embed'inden kalite başına HLS (`r_file=chunklist.m3u8`) ve doğrudan MP4 kaynakları çıkarılır. |
+| **IzleFilm** | Film sayfasında `data-player-url` ok.ru embed'ini işaret eder; iframe'deki `data-options` flashvars içinde `metadata.ondemandHls` doğrudan HLS master adresini verir. |
+| **BirAsyaDizi** | Bölüm sayfasındaki odnoklassniki embed'inin `data-options` JSON'u aynı şekilde `metadata.ondemandHls` taşır; ok.ru yerine `vkuser.net` master döner. |
+| **FullFilmIzle** | Film sayfası iframe'i `videopark.top/oplayer` (sayfadaki `VIDEO_DATA` JSON'u HLS/MP4 kaynakları verir) veya `videoseyred.in/embed` → `/playlist/<num>.json` → HLS + Türkçe altyazı. |
 
 ---
 
@@ -218,7 +221,7 @@ CastSinema/
 
 | Komut | Ne yapar |
 |---|---|
-| `npm test` | Doğrulama + 20 birim test |
+| `npm test` | Doğrulama + 23 birim test |
 | `npm run validate` | Yalnızca statik kontroller |
 | `npm run set-repo -- <user> <repo>` | Kurulum adreslerini günceller |
 | `npm run github:setup -- [repo]` | Repo oluşturur, push eder, yayını doğrular |
@@ -247,7 +250,7 @@ CastSinema / Stremio. Each provider reads a site's HTML or API and fulfils the
 `getStreams(tmdbId, mediaType, season, episode)` contract.
 
 ```bash
-npm test                                        # validate + 20 unit tests
+npm test                                        # validate + 23 unit tests
 node scripts/set-repo.mjs <user> <repo>         # set your GitHub coordinates
 python tools/domain_watch.py                    # scan domains and test live
 ```
@@ -257,6 +260,10 @@ Install URL:
 ```text
 https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/manifest.json
 ```
+
+> The repository must stay **public**. The addon fetches the manifest and providers
+> from `raw.githubusercontent.com` anonymously — making the repo private breaks the
+> install (everything returns 404).
 
 See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the provider contract,
 [`docs/BRANDING.md`](docs/BRANDING.md) for hardcoded credentials and
@@ -269,7 +276,7 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the provider contract,
 | **DiziBox** | `www.dizibox.live` | series |
 | **ClipBox** | `vixsrc.to` | movie + series |
 | **Xpass** | `play.xpass.top` | movie + series |
-| **FilmModu** | `filmmodu.cc` | movie |
+| **FilmModu** | `filmmodu.news` | movie |
 | **DiziMom** | `ddizimom.net` | series |
 | **SetFilmIzle** | `www.setfilmizle.ltd` | movie + series |
 | **BoxFilm** | `boxfilm.net` | movie (~120) |

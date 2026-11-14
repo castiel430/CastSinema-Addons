@@ -29,7 +29,7 @@ yanlışlıkla placeholder'lı manifest'i yayınlayamazsınız.
 
 ### 2.1 TMDB API anahtarı
 
-Çoğu provider'da gömülü (29 dosya). Ortak değer:
+Çoğu provider'da gömülü (**32** dosya). Ortak değer:
 
 ```text
 4e44d9029b1270a757cddc766a1bcb63

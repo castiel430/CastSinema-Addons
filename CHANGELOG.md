@@ -5,6 +5,24 @@ All notable changes to CastSinema-Addons will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/tr/).
 
+## [1.9.4] - 2026-11-14
+
+### Changed
+- Manifest sürümü `1.9.4`, **36 provider**.
+- Repo bakım geçişi: README ve dağıtım/mimari dokümanları son duruma göre
+  güncellendi (23 birim test, provider'ta kullanılan TMDB anahtarının
+  dosya sayısı **32**, FilmModu host `filmmodu.cc` → `filmmodu.news`,
+  çift kayıtlı tablo satırları, `npm run github:setup` eklendi).
+
+### Fixed
+- Küçük doküman tutarsızlıkları (README 20→23 test, SETUP HOST örneği,
+  rapor klasörünün git'e eklenmemesi vurgulandı).
+
+### Notes
+- Repo **public** kalmalıdır; addon manifesti ve provider'ları anonim
+  `raw.githubusercontent.com` URL'lerinden çeker. Private repo yapılırsa 404
+  döner ve addon çalışmaz.
+
 ## [1.9.3] - 2026-11-14
 
 ### Added

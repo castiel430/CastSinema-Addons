@@ -270,7 +270,7 @@ Her provider kendi `HOST` değişkenini içinde taşır. Bu siteler sık sık do
 değiştirdiği için **bakımın en sık yapıldığı yer** budur:
 
 ```js
-var HOST = "https://filmmodu.cc";
+var HOST = "https://filmmodu.news";
 ```
 
 ---
