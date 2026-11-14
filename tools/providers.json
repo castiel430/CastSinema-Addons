@@ -442,5 +442,19 @@
       "tmdbId": "931285",
       "type": "movie"
     }
+  },
+  "castsinema-birasyadizi": {
+    "file": "providers/castsinema-birasyadizi.js",
+    "hostVar": "HOST",
+    "hostStyle": "single",
+    "base": "birasyadizi",
+    "www": true,
+    "marker": "BirAsyaDizi",
+    "test": {
+      "tmdbId": "326975",
+      "type": "tv",
+      "season": 1,
+      "episode": 1
+    }
   }
 }

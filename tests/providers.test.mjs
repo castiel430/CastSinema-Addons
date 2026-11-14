@@ -522,3 +522,28 @@ test('IzleFilm provider resolves an ok.ru embed into an HLS master', async () =>
   assert.equal(streams[0].url, hls);
   assert.ok(streams[0].title.includes('TR Dublaj'));
 });
+
+test('BirAsyaDizi provider resolves an odnoklassniki embed into an HLS master', async () => {
+  const hls = 'https://ok6-30.vkuser.net/expires/1794741749760/clientType/0/srcIp/46.197.29.53/type/2/mid/326975/id/17611719969503/ms/95.142.206.33/zs/65/srcAg/CHROME/urls/185.180.203.46%3B176.112.172.39/pr/10/ct/28/sig/abc/ondemand/hls4_17611719969503.m3u8';
+  const dataOptions = JSON.stringify({
+    flashvars: {
+      metadata: {
+        ondemandHls: hls
+      }
+    }
+  }).replace(/"/g, '&quot;');
+  const provider = await loadProvider('providers/castsinema-birasyadizi.js', async (url) => {
+    const u = String(url);
+    if (u.includes('/tv/326975')) return response({ json: { name: 'What a Boss Wants', original_name: 'What a Boss Wants' } });
+    if (u.includes('/?s=')) return response({ text: '<a href="https://www.birasyadizi.cx/dizi/what-a-boss-wants-2026-kore/">What a Boss Wants</a>' });
+    if (u.includes('/dizi/what-a-boss-wants-2026-kore/')) return response({ text: '<a href="https://www.birasyadizi.cx/bolum/what-a-boss-wants-2026-kore-1-bolum/">1. Bölüm</a>' });
+    if (u.includes('/bolum/what-a-boss-wants-2026-kore-1-bolum/')) return response({ text: '<iframe src="//odnoklassniki.ru/videoembed/17611719969503"></iframe>' });
+    if (u.includes('odnoklassniki.ru/videoembed/')) return response({ text: '<div data-options="' + dataOptions + '"></div>' });
+    return response({ ok: false });
+  });
+  const streams = await provider.getStreams('326975', 'tv', 1, 1);
+  assert.equal(streams.length, 1);
+  assert.equal(streams[0].provider, 'castsinema-birasyadizi');
+  assert.equal(streams[0].format, 'm3u8');
+  assert.equal(streams[0].url, hls);
+});

@@ -68,13 +68,14 @@ yayınlayamazsınız.
 | **AnimeciX** | `animecix.tv` | dizi (anime) | ✅ çalışıyor (MP4) |
 | **Anizium** | `anizium.co` | dizi (anime) | ✅ çalışıyor (MP4 + altyazı) |
 | **AsyaAnimeleri** | `asyaanimeleri.top` | dizi (anime) | ✅ çalışıyor (HLS) |
+| **BirAsyaDizi** | `birasyadizi.cx` | dizi (Asya) | ✅ çalışıyor (odnoklassniki → HLS) |
 | **IzleFilm** | `izlefilm.net` | film | ✅ çalışıyor (ok.ru → HLS) |
 | **DiziPal** | `dizipal1595.com` | film + dizi | ⚠️ Cloudflare (CI ağını 403'lüyor) |
 | **SelcukFlix** | `selcukflix.app` | film + dizi | ⚠️ Cloudflare (CI ağını 403'lüyor) |
 | **Dizilla** | `dizilla.la` | dizi | ⚠️ Cloudflare (CI ağını 403'lüyor) |
 | **Webteizle** | `webteizle.info` | film | ⚠️ Cloudflare (CI ağını 403'lüyor) |
 
-34 provider. Durumlar `tools/domain_watch.py` tarafından canlı olarak
+35 provider. Durumlar `tools/domain_watch.py` tarafından canlı olarak
 doğrulanır (aşağıya bakın). Cloudflare uyarısı alan provider'lar, çalışan kod
 yoluna sahiptir ancak bu deponun test çıkış IP'si site WAF'ı tarafından
 engellenir; ev/telefon ağından normal şekilde çalışırlar.
@@ -294,6 +295,7 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the provider contract,
 | **AnimeciX** | `animecix.tv` | series (anime) |
 | **Anizium** | `anizium.co` | series (anime) |
 | **AsyaAnimeleri** | `asyaanimeleri.top` | series (anime) |
+| **BirAsyaDizi** | `birasyadizi.cx` | series (Asian drama) |
 | **IzleFilm** | `izlefilm.net` | movie (ok.ru → HLS) |
 | **DiziPal** | `dizipal1595.com` | movie + series (Cloudflare WAF) |
 | **SelcukFlix** | `selcukflix.app` | movie + series (Cloudflare WAF) |
