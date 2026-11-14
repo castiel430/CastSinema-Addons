@@ -69,13 +69,14 @@ yayınlayamazsınız.
 | **Anizium** | `anizium.co` | dizi (anime) | ✅ çalışıyor (MP4 + altyazı) |
 | **AsyaAnimeleri** | `asyaanimeleri.top` | dizi (anime) | ✅ çalışıyor (HLS) |
 | **BirAsyaDizi** | `birasyadizi.cx` | dizi (Asya) | ✅ çalışıyor (odnoklassniki → HLS) |
+| **FullFilmIzle** | `fullfilmizle.fit` | film | ✅ çalışıyor (videopark + videoseyred HLS) |
 | **IzleFilm** | `izlefilm.net` | film | ✅ çalışıyor (ok.ru → HLS) |
 | **DiziPal** | `dizipal1595.com` | film + dizi | ⚠️ Cloudflare (CI ağını 403'lüyor) |
 | **SelcukFlix** | `selcukflix.app` | film + dizi | ⚠️ Cloudflare (CI ağını 403'lüyor) |
 | **Dizilla** | `dizilla.la` | dizi | ⚠️ Cloudflare (CI ağını 403'lüyor) |
 | **Webteizle** | `webteizle.info` | film | ⚠️ Cloudflare (CI ağını 403'lüyor) |
 
-35 provider. Durumlar `tools/domain_watch.py` tarafından canlı olarak
+36 provider. Durumlar `tools/domain_watch.py` tarafından canlı olarak
 doğrulanır (aşağıya bakın). Cloudflare uyarısı alan provider'lar, çalışan kod
 yoluna sahiptir ancak bu deponun test çıkış IP'si site WAF'ı tarafından
 engellenir; ev/telefon ağından normal şekilde çalışırlar.
@@ -191,8 +192,8 @@ her 6 saatte bir otomatik çalışacak şekilde tanımlıdır:
 
 ```text
 CastSinema/
-├── manifest.json           # 33 scraper tanımı
-├── providers/              # 33 provider JS dosyası
+├── manifest.json           # 36 scraper tanımı
+├── providers/              # 36 provider JS dosyası
 ├── assets/logo.png         # picker logosu
 ├── scripts/
 │   ├── validate.mjs        # manifest + provider doğrulaması
@@ -204,7 +205,7 @@ CastSinema/
 │   ├── run_provider.mjs    # provider'ı canlı siteye karşı çalıştıran koşum
 │   ├── providers.json      # provider başına test vakası ve host listesi
 │   └── requirements.txt
-├── tests/providers.test.mjs   # 20 birim testi
+├── tests/providers.test.mjs   # 23 birim testi
 └── docs/
     ├── ARCHITECTURE.md
     ├── BRANDING.md
@@ -296,6 +297,7 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the provider contract,
 | **Anizium** | `anizium.co` | series (anime) |
 | **AsyaAnimeleri** | `asyaanimeleri.top` | series (anime) |
 | **BirAsyaDizi** | `birasyadizi.cx` | series (Asian drama) |
+| **FullFilmIzle** | `fullfilmizle.fit` | movie (videopark + videoseyred HLS) |
 | **IzleFilm** | `izlefilm.net` | movie (ok.ru → HLS) |
 | **DiziPal** | `dizipal1595.com` | movie + series (Cloudflare WAF) |
 | **SelcukFlix** | `selcukflix.app` | movie + series (Cloudflare WAF) |

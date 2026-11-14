@@ -456,5 +456,17 @@
       "season": 1,
       "episode": 1
     }
+  },
+  "castsinema-fullfilmizle": {
+    "file": "providers/castsinema-fullfilmizle.js",
+    "hostVar": "HOST",
+    "hostStyle": "single",
+    "base": "fullfilmizle",
+    "www": false,
+    "marker": "FullFilmIzle",
+    "test": {
+      "tmdbId": "1083862",
+      "type": "movie"
+    }
   }
 }

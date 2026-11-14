@@ -547,3 +547,40 @@ test('BirAsyaDizi provider resolves an odnoklassniki embed into an HLS master', 
   assert.equal(streams[0].format, 'm3u8');
   assert.equal(streams[0].url, hls);
 });
+
+test('FullFilmIzle provider resolves a videopark VIDEO_DATA stream into an HLS master', async () => {
+  const hls = 'https://sithmanifest.com/enCoder/filmler/resident-evil-death-island/master/manifest.m3u8';
+  const provider = await loadProvider('providers/castsinema-fullfilmizle.js', async (url) => {
+    const u = String(url);
+    if (u.includes('/movie/1083862/external_ids')) {
+      return response({ json: { imdb_id: 'tt6084978' } });
+    }
+    if (u.includes('/movie/1083862')) {
+      return response({ json: { title: 'Resident Evil: Death Island', original_title: 'Resident Evil: Death Island' } });
+    }
+    if (u.includes('v3-cinemeta.strem.io/meta/movie/tt6084978.json')) {
+      return response({ json: { meta: { name: 'Resident Evil: Death Island' } } });
+    }
+    if (u.includes('/?s=')) {
+      return response({ text: '<a href="https://fullfilmizle.fit/resident-evil-death-island-izle/">Resident Evil: Death Island</a>' });
+    }
+    if (u === 'https://fullfilmizle.fit/resident-evil-death-island-izle/') {
+      return response({ text: '<iframe src="https://videopark.top/oplayer/?id=964860"></iframe>' });
+    }
+    if (u.includes('videopark.top/oplayer/')) {
+      return response({ text: 'const VIDEO_DATA = ' + JSON.stringify({
+        title: 'Video 964860',
+        duration: '5295',
+        mp4Sources: [],
+        hlsSource: { file: hls, type: 'application/vnd.apple.mpegurl', default: true }
+      }) + ';' });
+    }
+    return response({ ok: false });
+  });
+  const streams = await provider.getStreams('1083862', 'movie', null, null);
+  assert.equal(streams.length, 1);
+  assert.equal(streams[0].provider, 'castsinema-fullfilmizle');
+  assert.equal(streams[0].format, 'm3u8');
+  assert.equal(streams[0].url, hls);
+  assert.ok(streams[0].title.includes('TR Dublaj'));
+});

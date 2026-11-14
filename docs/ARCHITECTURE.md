@@ -11,9 +11,9 @@ Bu depo **tek ürün** içerir: Türkçe dizi/film siteleri için CastSinema scr
 
 ```text
                  ┌──────────────────────────────────────────────────┐
-                 │  manifest.json  (35 scraper tanımı)              │
+                 │  manifest.json  (36 scraper tanımı)              │
                  │      │                                           │
-                 │      └── providers/castsinema-*.js  (35 dosya)   │
+                 │      └── providers/castsinema-*.js  (36 dosya)   │
                  └──────────────────────────────────────────────────┘
                         │  CastSinema/Stremio uygulaması indirir
                         ▼
@@ -156,7 +156,7 @@ CastSinema'nun `scrapers[]` dizisini kullanır:
 
 ## 5. Provider türleri
 
-33 provider 4 ana akış ailesine ayrılır:
+36 provider 4 ana akış ailesine ayrılır:
 
 | Aile | Açıklama | Örnekler |
 |---|---|---|
@@ -225,9 +225,9 @@ Türkçe-duyarlı normalizasyon zorunludur (`ı/ş/ğ/ü/ö/ç`).
 6. **Marka tutarlılığı** — her provider'ın içindeki `provider:` id'si manifest
    `id`'siyle eşleşmeli; stream `name`'i `CastSinema • ` önekiyle başlamalı
 
-### 8.2 Testler — 20 test
+### 8.2 Testler — 23 test
 
-`tests/providers.test.mjs` içindeki 20 test, provider'ları **`node:vm`** içinde
+`tests/providers.test.mjs` içindeki 23 test, provider'ları **`node:vm`** içinde
 **mock `fetch`** ile çalıştırır — gerçek internete hiç çıkmaz.
 
 Kapsam: manifest şeması, ClipBox (film + TV), Vidup (decrypt + TV), Hexa
@@ -235,7 +235,7 @@ Kapsam: manifest şeması, ClipBox (film + TV), Vidup (decrypt + TV), Hexa
 (dizin + bölüm), HDFilmCehennemi (embed), BoxFilm (rotated player + altyazı),
 FullHDFilmizlesene (rotated source list), DiziFilmizle (Vidmixi + altyazı),
 Dizilla (pichive master + altyazı), Xpass (AES-256-GCM decrypt success/failure),
-YesilCam TV (query-string HLS).
+YesilCam TV (query-string HLS), FullFilmIzle (videopark/videoseyred HLS).
 
 > **Niyetli tasarım kararı:** Canlı kaynak sitelerin geçici kapanması veya
 > rate-limit'i CI'yi gereksiz yere kırmamasın diye canlı stream smoke testi

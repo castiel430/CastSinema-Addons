@@ -5,6 +5,15 @@ All notable changes to CastSinema-Addons will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/tr/).
 
+## [1.9.3] - 2026-11-14
+
+### Added
+- **FullFilmIzle** (`fullfilmizle.fit`) provider: Türkçe dublaj film arşivi
+  (videopark `VIDEO_DATA` / videoseyred `/playlist/<num>.json` → HLS master).
+
+### Changed
+- Manifest sürümü `1.9.3`, **36 provider**.
+
 ## [1.9.2] - 2026-11-14
 
 ### Added
