@@ -39,7 +39,7 @@ git add -A && git commit -m "chore: set repository coordinates" && git push
 ### 2.3 GitHub Actions
 
 `.github/workflows/ci.yml` her push'ta `validate` + test çalıştırır. Depoyu
-fork'larsanız kendi CI'ınız otomatik çalışır; **secret veya başka ayar
+fork'larsanız kendi CI'nız otomatik çalışır; **secret veya başka ayar
 gerekmez**.
 
 Repo ayarlarında Actions için "Read and write permissions" gerekmez —
@@ -48,8 +48,6 @@ CI sadece okur.
 ---
 
 ## 3. Kurulum adresleri
-
-`<KULLANICI>` / `<DEPO>` yerine kendi bilgilerinizi yazın:
 
 ```text
 https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/manifest.json
@@ -69,7 +67,7 @@ curl -s https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/mani
 Kontrol edilecekler:
 
 - `"id": "castsinema"` ve `"name": "CastSinema"`
-- 12 scraper girdisi
+- 33 scraper girdisi
 - Her `filename` için `https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/<filename>`
   adresi **200** dönmeli
 
@@ -120,7 +118,8 @@ git commit -am "fix: update FilmModu host" && git push
 
 1. `providers/castsinema-<ad>.js` oluşturun (`getStreams` export'u ile)
 2. `manifest.json`'a scraper girdisi ekleyin — `id` ve `provider` eşleşmeli
-3. `npm test`
+3. `tools/providers.json`'a test konfigürasyonu ekleyin
+4. `npm test`
 
 Ayrıntı → [`ARCHITECTURE.md §10`](ARCHITECTURE.md#10-bakım-rehberi)
 
@@ -163,10 +162,10 @@ Stream `name` alanını `CastSinema • <Kaynak>` biçiminde yazın.
 ### Provider hiç stream döndürmüyor
 
 1. Site adresi değişmiş olabilir — `HOST` sabitini kontrol edin
-2. `enc-dec.app` / `sub.vyper.top` çalışıyor mu?
-3. Site yapısı değişmiş olabilir — regex'i güncelleyin
-4. CastSinema loglarında provider'ın `console.error` çıktısını arayın
-5. Site CAPTCHA'ya geçmiş olabilir — `dizibox` bunu tespit edip hata verir
+2. Site yapısı değişmiş olabilir — regex'i güncelleyin
+3. CastSinema loglarında provider'ın `console.error` çıktısını arayın
+4. Site CAPTCHA'ya geçiş olabilir — `dizibox` bunu tespit edip hata verir
+5. Cloudflare WAF engeli olabilir (webteizle, dizipal, selcukflix) — tarayıcıdan doğrulayın
 
 ### Logo görünmüyor
 

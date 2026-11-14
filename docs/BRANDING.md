@@ -6,7 +6,7 @@ Bu depoyu yayınlamadan önce yapmanız gereken değişiklikler.
 
 ## 1. Zorunlu: GitHub koordinatları
 
-`manifest.json` içindeki logo URL'leri placeholder içeriyor:
+`manifest.json` içindeki logo URL'leri şu formdadır:
 
 ```json
 "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png"
@@ -21,7 +21,7 @@ npm test
 
 Betik `manifest.json`, `README.md` ve `docs/*.md` içindeki tüm URL'leri
 günceller. `npm run validate` placeholder kaldığında **hata verir** — yani
-yanlışlıkla placeholder'lı manifest'ı yayınlayamazsınız.
+yanlışlıkla placeholder'lı manifest'i yayınlayamazsınız.
 
 ---
 
@@ -29,23 +29,13 @@ yanlışlıkla placeholder'lı manifest'ı yayınlayamazsınız.
 
 ### 2.1 TMDB API anahtarı
 
-**7 dosyada** gömülü:
+Çoğu provider'da gömülü (29 dosya). Ortak değer:
 
-```bash
-Get-ChildItem -Recurse -File -Filter *.js |
-  Select-String -Pattern '4e44d9029b1270a757cddc766a1bcb63'
+```text
+4e44d9029b1270a757cddc766a1bcb63
 ```
 
-| Dosya | Kullanım |
-|---|---|
-| `providers/castsinema-dizibox.js` | 3. sıralı yedek — `globalThis.TMDB_API_KEY` önceliklidir |
-| `providers/castsinema-filmmodu.js` | doğrudan `?api_key=` |
-| `providers/castsinema-dizimom.js` | doğrudan `?api_key=` |
-| `providers/castsinema-setfilmizle.js` | doğrudan `?api_key=` |
-| `providers/castsinema-filmmakinesi.js` | doğrudan `?api_key=` |
-| `providers/castsinema-hdfilmcehennemi.js` | doğrudan `?api_key=` |
-
-Bu anahtar **upstream'e aittir ve herkese açıktır**. İki seçenek:
+Bu anahtar upstream'e aittir ve herkese açıktır. İki seçenek:
 
 **A) CastSinema'nun kendi anahtarını kullanın (önerilen).**
 CastSinema uygulaması `globalThis.TMDB_API_KEY` inject eder. `dizibox` zaten bu
@@ -55,7 +45,7 @@ zinciri uygular:
 var key = String(saved.tmdbApiKey || root.TMDB_API_KEY || '4e44d9029b1270a757cddc766a1bcb63').trim();
 ```
 
-Diğer 5 provider'da da aynı deseni uygulayın:
+Diğer provider'larda da aynı deseni uygulayın:
 
 ```js
 function tmdbKey() {
@@ -73,38 +63,14 @@ uzunsa v4 Read Access Token (`Authorization: Bearer`), değilse v3 API key
 > `validate.mjs` yalnızca **Google** API anahtarlarını (`AIza…`) reddeder,
 > TMDB anahtarlarını reddetmez — yani unutursanız fark edilmez.
 
-### 2.2 Hexa parmak izi
+### 2.2 BoxFilm parmak izi
 
 ```js
 "X-Fingerprint-Lite": "e9136c41504646444"
 ```
 
-**Konum:** `providers/castsinema-hexa.js`. Hexa API'nin beklediği sabit değerdir.
+**Konum:** `providers/castsinema-boxfilm.js`. BoxFilm API'nin beklediği sabit değerdir.
 Değiştirmek provider'ı bozar.
-
-### 2.3 Üçüncü taraf çözümleme servisi
-
-```js
-var DECRYPT_API = "https://enc-dec.app/api";
-```
-
-**Konum:** `providers/castsinema-{vidup,hexa,vidfastpro,vidcore}.js`
-
-Bu servis 5 provider'ın omurgasıdır. Upstream'de adres private
-`ApiConstants.kt`'den otomatik tazeleniyordu; **artık sabittir** ve elle
-güncellenmelidir. Servis çökerse 5 provider birlikte çalışmaz.
-
-Servisin kullanım şartlarını okuyun — kendi sağlayıcınızı kullanacaksanız
-`DECRYPT_API` ve endpoint yollarını değiştirmeniz gerekir.
-
-### 2.4 Altyazı servisi
-
-```js
-// providers/castsinema-clipbox.js ve diğerleri
-var SUB_API = "https://sub.vyper.top/vtt?tmdb=" + id + "&lang=tr";
-```
-
-**Konum:** `providers/castsinema-clipbox.js`. Alternatifi yoktur.
 
 ---
 
@@ -163,7 +129,7 @@ assets/logo.png   (512×512, CastSinema "CS" logosu)
 Kendi logonuzu koymak için: aynı dosya adıyla `assets/logo.png` yazın.
 Boyut önerisi: 512×512 PNG, kare, şeffaf arka plan.
 
-Üretmek için: `manifest.json`'daki `logo` alanı
+Kontrol için: `manifest.json`'daki `logo` alanı
 `https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png`
 olmalıdır.
 
@@ -175,9 +141,8 @@ olmalıdır.
 [ ] node scripts/set-repo.mjs <user> <repo>  çalıştırıldı
 [ ] Logo URL'si kendi raw.githubusercontent.com adresinize bakıyor
 [ ] TMDB anahtarı: kendi anahtarınız veya globalThis.TMDB_API_KEY zinciri
-[ ] enc-dec.app kullanım şartları kontrol edildi
 [ ] npm test geçiyor
-[ ] `npm run validate` geçiyor (provider id önekleri `castsinema-` ile başlıyor)
+[ ] npm run validate geçiyor (provider id önekleri `castsinema-` ile başlıyor)
 [ ] GitHub'a push edildi ve manifest URL'si tarayıcıda açılıyor
 ```
 
@@ -196,4 +161,4 @@ curl -s https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/mani
 MIT License. Lisans metni için [`LICENSE`](../LICENSE) dosyasına bakın.
 
 Lisansı değiştirmek istiyorsanız `package.json`'daki `license` alanını güncelleyin.
-ancak GPL-3.0'ün kaynak kodunu yayımlama yükümlülüğünü gözden geçirin.
+Ancak GPL-3.0'ün kaynak kodunu yayımlama yükümlülüğünü gözden geçirin.
