@@ -126,7 +126,7 @@ deniyor (Chrome → Firefox → Edge → Safari → medya istemcisi → profil's
 
 ## Nasıl çalışır
 
-Provider dosyaları CommonJS modülüdür ve istemcide (QuickJS) çalışır:
+Provider dosyaları CommonJS modülüdür ve istemci JS motorunda (Hermes / QuickJS) çalışır:
 
 ```js
 function getStreams(tmdbId, mediaType, season, episode) { /* -> Promise<Stream[]> */ }
@@ -149,8 +149,7 @@ Dönen stream nesnesi:
 
 Kurallar:
 
-- **Promise zinciri kullanılır**, `async/await` yok (QuickJS'te dinamik kodda
-  güvenilir değil).
+- **Promise zinciri kullanılır**, `async/await` yok (istemci motorunda güvenilir değil).
 - Sayfa içi JavaScript **çalıştırılmaz**; oynatıcı config'leri statik çözülür.
 - `provider` alanı manifest `id`'siyle, `name` alanı `CastSinema • ` önekiyle
   birebir eşleşmelidir. `npm run validate` bunu zorunlu kılar.

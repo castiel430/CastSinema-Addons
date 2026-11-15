@@ -18,7 +18,7 @@ Bu depo **tek ürün** içerir: Türkçe dizi/film siteleri için CastSinema scr
                         │  CastSinema/Stremio uygulaması indirir
                         ▼
         ┌────────────────────────────────────────────────────────────┐
-        │  Hermes (istemci JS motoru)                            │
+        │  Hermes / QuickJS (istemci JS motoru)                            │
         │   getStreams(tmdbId, type, season, episode)            │
         │        │                                                │
         │        ├── TMDB (başlık/arama)                         │
@@ -170,9 +170,9 @@ güncellenmelidir.
 
 ---
 
-## 6. Hermes uyumluluğu
+## 6. İstemci motoru uyumluluğu (Hermes / QuickJS)
 
-CastSinema provider JS'i **Hermes** içinde çalıştırır. Kritik kısıtlar:
+CastSinema provider JS'i istemci motorunda (**Hermes / QuickJS**) çalıştırılır. Kritik kısıtlar:
 
 | Kısıt | Sonuç |
 |---|---|
