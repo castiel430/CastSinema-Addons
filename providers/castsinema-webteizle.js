@@ -73,14 +73,38 @@ function langOf(label) {
   return "";
 }
 
-function titleOf(id, mediaType) {
+function metaOf(id, mediaType) {
   var path = mediaType === "tv" ? "/tv/" : "/movie/";
   return text(TMDB_API + path + encodeURIComponent(String(id)) + "?api_key=" + TMDB_KEY + "&language=tr-TR")
     .then(function (body) {
       var meta = JSON.parse(body) || {};
-      return String(meta.title || meta.name || meta.original_title || meta.original_name || "").trim();
+      var local = String(meta.title || meta.name || "").trim();
+      var original = String(meta.original_title || meta.original_name || "").trim();
+      var date = String(meta.release_date || meta.first_air_date || "");
+      var year = (date.match(/^\d{4}/) || [""])[0];
+      return { local: local, original: original, year: year };
     })
-    .catch(function () { return ""; });
+    .catch(function () { return { local: "", original: "", year: "" }; });
+}
+
+// Slug candidates, most likely first. Foreign titles live on the site under
+// their English slug, Turkish titles under their (win1254-fold) slug, so the
+// original-title guess must be tried even before the localized one is ruled out.
+function candidates(meta) {
+  var seen = {};
+  var out = [];
+  var bases = [meta.original || "", meta.local || ""];
+  for (var i = 0; i < bases.length; i++) {
+    var base = slugify(bases[i]);
+    if (base && !seen[base]) { seen[base] = 1; out.push(base); }
+  }
+  if (meta.year) {
+    for (var j = 0; j < bases.length; j++) {
+      var y = slugify(bases[j]) + "-" + meta.year;
+      if (!seen[y]) { seen[y] = 1; out.push(y); }
+    }
+  }
+  return out;
 }
 
 var WIN1254 = {
@@ -110,13 +134,20 @@ function filmOf(page, slug) {
   return id ? { id: id, slug: slug } : null;
 }
 
-function detail(title) {
+function detail(meta) {
+  var title = meta.local || meta.original || "";
   var slug = slugify(title);
-  // A direct slug guess can fail (404 or a Cloudflare interstitial) without the
-  // real search being broken, so the filter search below always runs.
-  return text(BASE + "/hakkinda/" + slug)
-    .then(function (page) { return filmOf(page, slug); })
-    .catch(function () { return null; })
+  var tries = candidates(meta);
+  // Try the site slugs in order; a direct guess can fail (404 or a Cloudflare
+  // interstitial), so the filter search below remains the last resort.
+  function trySlug(i) {
+    if (i >= tries.length) return Promise.resolve(null);
+    var s = tries[i];
+    return text(BASE + "/hakkinda/" + s)
+      .then(function (page) { var hit = filmOf(page, s); return hit || trySlug(i + 1); })
+      .catch(function () { return trySlug(i + 1); });
+  }
+  return trySlug(0)
     .then(function (hit) {
       if (hit) return hit;
       return text(BASE + "/filtre?a=" + encodeWin1254(title)).then(function (list) {
@@ -361,10 +392,10 @@ function getStreams(tmdbId, mediaType, season, episode) {
   var tv = mediaType === "tv" || mediaType === "series";
   var s = tv ? String(parseInt(season, 10) || 1) : "";
   var b = tv ? String(parseInt(episode, 10) || 1) : "";
-  return titleOf(tmdbId, mediaType)
-    .then(function (title) {
-      if (!title) return null;
-      return detail(title).then(function (info) {
+  return metaOf(tmdbId, mediaType)
+    .then(function (meta) {
+      if (!meta.local && !meta.original) return null;
+      return detail(meta).then(function (info) {
         return info ? attempt(info, 0, s, b) : [];
       });
     })

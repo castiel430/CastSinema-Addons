@@ -5,6 +5,19 @@ All notable changes to CastSinema-Addons will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/tr/).
 
+## [1.9.7] - 2026-11-18
+
+### Fixed
+- **Webteizle** slug çözümlemesi: sitedeki film sayfalarını arama sayfası
+  (`/filtre?a=`) yerine doğrudan `/hakkinda/<slug>` üzerinden bulur —
+  orijinal başlıktan (`original_title`) slug üretir, gerekiyorsa yıl son eki
+  (`-<yyyy>`) dener. Yabancı filmler artık `/filtre` yoluna (Cloudflare
+  challenged) hiç girmeden akış üretir; ör. *Fight Club* ve *Matrix* canlıda
+  akış döndürüyor. `/filtre` son çare olarak yerinde duruyor.
+
+### Changed
+- Manifest sürümü `1.9.7`, **36 provider**.
+
 ## [1.9.6] - 2026-11-18
 
 ### Changed
