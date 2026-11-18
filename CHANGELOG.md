@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/tr/).
   oynatıcı CDN'inin (dplayer82) bilinen Cloudflare kısıtıdır.
 
 ### Changed
+- Domain watchdog düzeltmeleri: `CFG` gibi nesne biçimli host sabitleri artık
+  okunabiliyor; 5 provider'ın (`dizibox`, `filmmodu`, `setfilmizle`, `webteizle`,
+  `sezonlukdizi`) yanlış `hostVar` eşleşmesi giderildi. Watchdog artık yalnızca
+  gerçek bir domain değişimi saptadığında (`--strict` ile) hata veriyor —
+  Cloudflare/rate-limit kaynaklı 0 akışlar zamanlanmış CI'ı kırmıyor.
+- GitHub Actions: `checkout`, `setup-node`, `setup-python` v7'ye yükseltildi.
 - Manifest sürümü `1.9.5`, **36 provider**.
 
 ## [1.9.4] - 2026-11-14

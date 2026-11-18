@@ -13,7 +13,7 @@
   },
   "castsinema-dizibox": {
     "file": "providers/castsinema-dizibox.js",
-    "hostVar": "DEFAULT_SITE",
+    "hostVar": "HOST",
     "hostStyle": "single",
     "base": "dizibox",
     "www": true,
@@ -51,7 +51,7 @@
   },
   "castsinema-filmmodu": {
     "file": "providers/castsinema-filmmodu.js",
-    "hostVar": "HOST",
+    "hostVar": "BASE",
     "hostStyle": "single",
     "base": "filmmodu",
     "www": false,
@@ -77,7 +77,7 @@
   },
   "castsinema-setfilmizle": {
     "file": "providers/castsinema-setfilmizle.js",
-    "hostVar": "HOST",
+    "hostVar": "BASE",
     "hostStyle": "single",
     "base": "www.setfilmizle",
     "www": false,
@@ -125,7 +125,7 @@
   },
   "castsinema-webteizle": {
     "file": "providers/castsinema-webteizle.js",
-    "hostVar": "DEFAULT_SITE",
+    "hostVar": "BASE",
     "hostStyle": "single",
     "base": "webteizle",
     "www": true,
@@ -137,7 +137,7 @@
   },
   "castsinema-sezonlukdizi": {
     "file": "providers/castsinema-sezonlukdizi.js",
-    "hostVar": "DEFAULT_SITE",
+    "hostVar": "BASE",
     "hostStyle": "single",
     "base": "sezonlukdizi",
     "www": true,
@@ -378,7 +378,7 @@
   "castsinema-rectv": {
     "file": "providers/castsinema-rectv.js",
     "hostVar": "CFG",
-    "hostStyle": "single",
+    "hostStyle": "object",
     "base": "rectv",
     "www": false,
     "marker": "RecTV",

@@ -142,6 +142,15 @@ def read_hosts(provider_file: Path, host_var: str, host_style: str) -> list[str]
         if not match:
             return []
         return re.findall(r'"(https?://[^"]+)"', match.group(1))
+    if host_style == "object":
+        block = re.search(
+            rf"var\s+{re.escape(host_var)}\s*=\s*\{{(.*?)\n\}};", code, re.S
+        )
+        if not block:
+            return []
+        return re.findall(
+            r'\b(?:base|altBase)\s*:\s*"(https?://[^"]+)"', block.group(1)
+        )
     match = re.search(
         rf"var\s+{re.escape(host_var)}\s*=\s*['\"](https?://[^'\"]+)['\"]", code
     )
@@ -157,6 +166,12 @@ def write_hosts(provider_file: Path, host_var: str, host_style: str, hosts: list
         literal = ", ".join(f'"{h}"' for h in hosts)
         pattern = re.compile(rf"var\s+{re.escape(host_var)}\s*=\s*\[[^\]]*\]")
         replacement = f"var {host_var} = [{literal}]"
+    elif host_style == "object":
+        pattern = re.compile(
+            rf"(var\s+{re.escape(host_var)}\s*=\s*\{{.*?\bbase\s*:\s*)\"https?://[^\"]+\"",
+            re.S,
+        )
+        replacement = rf'\g<1>"{hosts[0]}"'
     else:
         pattern = re.compile(
             rf"var\s+{re.escape(host_var)}\s*=\s*['\"]https?://[^'\"]+['\"]"
@@ -415,6 +430,11 @@ def main() -> int:
     parser.add_argument("--commit", action="store_true", help="commit and push the rewrites")
     parser.add_argument("--provider", action="append", default=[], help="limit the scan to these providers")
     parser.add_argument("--report", default="", help="path of the Markdown report to write")
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="exit 1 when a domain move needs attention (scheduled CI fails loudly)",
+    )
     args = parser.parse_args()
 
     if curl_requests is None:
@@ -446,8 +466,11 @@ def main() -> int:
         if commit_and_push(results):
             print(f"pushed {len(changed)} provider update(s)")
 
-    broken = [r for r in results if r.status == "broken"]
-    return 1 if broken else 0
+    # A provider that returns no streams is usually an upstream block (Cloudflare
+    # WAF, rate limit) - that is not a domain problem. Only a detected domain
+    # move deserves a failing CI run, and --fix resolves it.
+    needs_attention = [r for r in results if r.status == "fixed" and not r.changed]
+    return 1 if args.strict and needs_attention else 0
 
 
 if __name__ == "__main__":
