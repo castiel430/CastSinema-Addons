@@ -67,7 +67,7 @@ curl -s https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/mani
 Kontrol edilecekler:
 
 - `"id": "castsinema"` ve `"name": "CastSinema"`
-- 36 scraper girdisi
+- 37 scraper girdisi
 - Her `filename` için `https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/<filename>`
   adresi **200** dönmeli
 

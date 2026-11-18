@@ -468,5 +468,17 @@
       "tmdbId": "1083862",
       "type": "movie"
     }
+  },
+  "castsinema-yfilmizle": {
+    "file": "providers/castsinema-yfilmizle.js",
+    "hostVar": "HOSTS",
+    "hostStyle": "list",
+    "base": "tikfilmizle",
+    "www": false,
+    "marker": "filmplus",
+    "test": {
+      "tmdbId": "1108427",
+      "type": "movie"
+    }
   }
 }

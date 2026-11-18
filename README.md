@@ -73,12 +73,13 @@ yayınlayamazsınız.
 | **BirAsyaDizi** | `birasyadizi.cx` | dizi (Asya) | ✅ çalışıyor (odnoklassniki → HLS) |
 | **FullFilmIzle** | `fullfilmizle.fit` | film | ✅ çalışıyor (videopark + videoseyred HLS) |
 | **IzleFilm** | `izlefilm.net` | film | ✅ çalışıyor (ok.ru → HLS) |
+| **YFilmizle** | `tikfilmizle.com` (Limon ailesi) | film | ✅ çalışıyor (HLS, TR Dublaj + Altyazılı) |
 | **DiziPal** | `dizipal1596.com` | film + dizi | ⚠️ Cloudflare (CI ağını 403'lüyor) |
 | **SelcukFlix** | `selcukflix.app` | film + dizi | ⚠️ Cloudflare (CI ağını 403'lüyor) |
 | **Dizilla** | `dizilla.la` | dizi | ⚠️ Cloudflare (CI ağını 403'lüyor) |
 | **Webteizle** | `webteizle.info` | film | ⚠️ Cloudflare (CI ağını 403'lüyor) |
 
-36 provider. Durumlar `tools/domain_watch.py` tarafından canlı olarak
+37 provider. Durumlar `tools/domain_watch.py` tarafından canlı olarak
 doğrulanır (aşağıya bakın). Cloudflare uyarısı alan provider'lar, çalışan kod
 yoluna sahiptir ancak bu deponun test çıkış IP'si site WAF'ı tarafından
 engellenir; ev/telefon ağından normal şekilde çalışırlar.
@@ -107,6 +108,7 @@ engellenir; ev/telefon ağından normal şekilde çalışırlar.
 | **IzleFilm** | Film sayfasında `data-player-url` ok.ru embed'ini işaret eder; iframe'deki `data-options` flashvars içinde `metadata.ondemandHls` doğrudan HLS master adresini verir. |
 | **BirAsyaDizi** | Bölüm sayfasındaki odnoklassniki embed'inin `data-options` JSON'u aynı şekilde `metadata.ondemandHls` taşır; ok.ru yerine `vkuser.net` master döner. |
 | **FullFilmIzle** | Film sayfası iframe'i `videopark.top/oplayer` (sayfadaki `VIDEO_DATA` JSON'u HLS/MP4 kaynakları verir) veya `videoseyred.in/embed` → `/playlist/<num>.json` → HLS + Türkçe altyazı. |
+| **YFilmizle** | WP `wp-json` ile arama yapar (yabancı katalog, film-odaklı). Her film sayfasında `<!--baslik: ...-->` yorumuyla işaretlenen `hotstream.club` embed’i vardır; `post-page-numbers` bağlantıları `Türkçe Dublaj` ↔ `Türkçe Altyazılı` varyantlarını verir ve ikisi de çözülür. Oynatıcı `be-player-config` (AES-256-CBC; anahtar = videoId, CryptoJS `evpKdf`) açılır ve HLS adresi alınır. Limon ailesi aynaları (`tikfilmizle`, `okfilmizle`, `infilmizle`, `ultraiz`, `nadirfilm`) aynı veritabanını paylaşır; provider ayna sırasını dener. |
 
 ---
 
@@ -194,8 +196,8 @@ her 6 saatte bir otomatik çalışacak şekilde tanımlıdır:
 
 ```text
 CastSinema/
-├── manifest.json           # 36 scraper tanımı
-├── providers/              # 36 provider JS dosyası
+├── manifest.json           # 37 scraper tanımı
+├── providers/              # 37 provider JS dosyası
 ├── assets/logo.png         # picker logosu
 ├── scripts/
 │   ├── validate.mjs        # manifest + provider doğrulaması

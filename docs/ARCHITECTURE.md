@@ -13,7 +13,7 @@ Bu depo **tek ürün** içerir: Türkçe dizi/film siteleri için CastSinema scr
                  ┌──────────────────────────────────────────────────┐
                  │  manifest.json  (36 scraper tanımı)              │
                  │      │                                           │
-                 │      └── providers/castsinema-*.js  (36 dosya)   │
+                 │      └── providers/castsinema-*.js  (37 dosya)   │
                  └──────────────────────────────────────────────────┘
                         │  CastSinema/Stremio uygulaması indirir
                         ▼

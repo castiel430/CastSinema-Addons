@@ -5,6 +5,19 @@ All notable changes to CastSinema-Addons will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/tr/).
 
+## [1.9.9] - 2026-11-19
+
+### Added
+- **YFilmizle** (`castsinema-yfilmizle`): Limon Film ailesi (`tikfilmizle.com`,
+  ayna: `okfilmizle.com`, `infilmizle.com`, `ultraiz.net`, `nadirfilm.com`) için
+  Türkçe film sağlayıcısı. Akış: WP `wp-json` araması → film sayfasındaki
+  `hotstream.club` embed'i (`be-player-config`, AES-256-CBC; anahtar = videoId,
+  `evpKdf`) → HLS master. Sayfadaki `post-page-numbers` bağlantıları üzerinden
+  **Türkçe Dublaj** ve **Türkçe Altyazılı** varyantları ayrı ayrı çözülür
+  (Moana: 2 akış doğrulandı). Provider yalnızca film döndürür (katalogda dizi
+  yok) ve referer-kilitli embed için `proxyHeaders` gönderir.
+- Manifest sürümü `1.9.9`, **37 provider**.
+
 ## [1.9.8] - 2026-11-18
 
 ### Removed
