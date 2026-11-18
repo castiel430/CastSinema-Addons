@@ -325,7 +325,7 @@ function streamsFromConfig(cfg, iframeUrl, isMovie, season, episode, title) {
     subtitles.push({ label: sub.label || sub.name || "Altyazı", lang: sub.lang || sub.language || "tr", url: surl });
   }
   return [{
-    name: "CastSinema • Dizilla",
+    name: "🇹🇷 CastSinema • Dizilla",
     title: "Dizilla • " + label + " • 1080p",
     url: master,
     quality: 1080,

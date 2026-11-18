@@ -113,7 +113,7 @@ function getStreams(tmdbId, mediaType, season, episode) {
         subs.push({ url: abs(playerUrl, m[1]), language: lang, name: (m[2] || lang.toUpperCase()) + " [diziyou]" });
       }
       return [{
-        name: "CastSinema • DiziYou",
+        name: "🇹🇷 CastSinema • DiziYou",
         title: "DiziYou • 1080p • HLS",
         url: url,
         quality: 1080,

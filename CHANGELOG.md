@@ -5,6 +5,16 @@ All notable changes to CastSinema-Addons will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/tr/).
 
+## [1.9.6] - 2026-11-18
+
+### Changed
+- Stream adlarına **🇹🇷 bayrağı** eklendi: tüm sağlayıcılar `🇹🇷 CastSinema • <Kaynak>`
+  biçiminde yayına çıkıyor (36 provider, 39 akış adı). Kaynaklar Türkçe içerik
+  (Türkçe dublaj / en azından TR altyazı) taşır; TR altyazılar zaten `lang: "tr"`
+  olarak iletilir.
+- `validate.mjs` artık `🇹🇷` + `CastSinema` içermeyen stream adlarını reddediyor.
+- Manifest sürümü `1.9.6`, **36 provider**.
+
 ## [1.9.5] - 2026-11-18
 
 ### Fixed

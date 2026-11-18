@@ -184,7 +184,7 @@ function getStreams(tmdbId, mediaType, season, episode) {
                 while ((m2 = re2.exec(playlist)) !== null) best = Math.max(best, parseInt(m2[1], 10) || 0);
                 var q = best > 0 ? best + "p" : "auto";
                 return [{
-                  name: "CastSinema • FilmModu",
+                  name: "🇹🇷 CastSinema • FilmModu",
                   title: "FilmModu • " + (audios.length ? audios.join(" / ") : "HLS"),
                   url: stream,
                   quality: q,
@@ -196,7 +196,7 @@ function getStreams(tmdbId, mediaType, season, episode) {
                 }];
               }).catch(function () {
                 return [{
-                  name: "CastSinema • FilmModu",
+                  name: "🇹🇷 CastSinema • FilmModu",
                   title: "FilmModu • " + (audios.length ? audios.join(" / ") : "HLS"),
                   url: stream,
                   quality: "auto",

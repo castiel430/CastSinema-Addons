@@ -388,7 +388,7 @@ function resolvePage(pageUrl, title, wantType) {
           var file = hit.url;
           var hls = /\.m3u8/i.test(file) || /vidmixi\.com\/list\//i.test(file);
           streams.push({
-            name: "CastSinema • DiziFilmizle",
+            name: "🇹🇷 CastSinema • DiziFilmizle",
             title: "DiziFilmizle • " + title + (idx > 0 ? " • Alt " + (idx + 1) : "") + " • TR Dublaj - HD",
             url: file,
             quality: 1080,

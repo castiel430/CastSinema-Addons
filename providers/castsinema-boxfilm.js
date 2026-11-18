@@ -242,7 +242,7 @@ function resolveItem(item, title) {
       // The HLS CDN only answers requests whose Referer is the player host.
       var headers = { "User-Agent": UA, "Referer": playerUrl, "Origin": "https://boxload.xyz" };
       return [{
-        name: "CastSinema • BoxFilm",
+        name: "🇹🇷 CastSinema • BoxFilm",
         title: "BoxFilm • " + (title || item.title || "Film") + " • " + (item.language_label || "DUAL") + " • 1080p",
         url: player.file,
         quality: 1080,

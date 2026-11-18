@@ -236,7 +236,7 @@ function streamsFor(pageUrl) {
           seen[item.url] = true;
           if (!subs.length) subs = item.subs;
           rows.push({
-            name: "CastSinema • SetFilmIzle",
+            name: "🇹🇷 CastSinema • SetFilmIzle",
             title: "SetFilmIzle • " + item.quality + " • HLS",
             url: item.url,
             quality: item.quality,

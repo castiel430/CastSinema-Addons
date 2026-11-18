@@ -205,7 +205,7 @@ function getStreams(tmdbId, mediaType, season, episode) {
               if (isTv) label += " • S" + sNum + "E" + eNum;
               var headers = { "User-Agent": UA, "Referer": embedUrl };
               return [{
-                name: "CastSinema • ClipBox",
+                name: "🇹🇷 CastSinema • ClipBox",
                 title: "ClipBox • " + label + " • HLS",
                 url: playlistUrl,
                 quality: 1080,

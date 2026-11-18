@@ -234,7 +234,7 @@ function row(url, quality, subs, dubbing, hls, referer) {
   var hdrs = { "User-Agent": UA };
   if (referer) hdrs.Referer = referer;
   return {
-    name: "CastSinema • Webteizle",
+    name: "🇹🇷 CastSinema • Webteizle",
     title: "Webteizle • " + quality + (hls ? " [HLS]" : " [MP4]") + label,
     url: url,
     quality: quality,

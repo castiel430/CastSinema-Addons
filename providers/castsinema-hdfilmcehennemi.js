@@ -489,7 +489,7 @@ function buildStreams(embedUrl, referer, title, isTv, season, episode) {
       var streams = [];
       for (var i = 0; i < manifests.length; i++) {
         streams.push({
-          name: "CastSinema • HDFilmCehennemi",
+          name: "🇹🇷 CastSinema • HDFilmCehennemi",
           title: "HDFilmCehennemi • " + label + " • HLS",
           url: manifests[i],
           quality: 1080,

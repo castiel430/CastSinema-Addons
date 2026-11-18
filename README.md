@@ -137,7 +137,7 @@ Dönen stream nesnesi:
 
 ```js
 {
-  name:    "CastSinema • FilmModu",   // manifest ile aynı olmalı
+  name:    "🇹🇷 CastSinema • FilmModu",   // manifest ile aynı olmalı
   title:   "FilmModu • Dövüş Kulübü • HLS 1080p",
   url:     "https://cdn.example/x.m3u8",
   quality: 1080,
@@ -151,7 +151,7 @@ Kurallar:
 
 - **Promise zinciri kullanılır**, `async/await` yok (istemci motorunda güvenilir değil).
 - Sayfa içi JavaScript **çalıştırılmaz**; oynatıcı config'leri statik çözülür.
-- `provider` alanı manifest `id`'siyle, `name` alanı `CastSinema • ` önekiyle
+- `provider` alanı manifest `id`'siyle, `name` alanı `🇹🇷 CastSinema • ` önekiyle
   birebir eşleşmelidir. `npm run validate` bunu zorunlu kılar.
 
 Detaylı sözleşme → [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)

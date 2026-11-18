@@ -224,7 +224,7 @@ function getStreams(tmdbId, mediaType, season, episode) {
         var height = first(/RESOLUTION=\d+x(\d+)/, playlist);
         var quality = height ? height + "p" : "auto";
         return [{
-          name: "CastSinema • DiziBox",
+          name: "🇹🇷 CastSinema • DiziBox",
           title: "DiziBox • " + quality + " • HLS",
           url: stream,
           quality: 1080,

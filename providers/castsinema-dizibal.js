@@ -104,7 +104,7 @@ function rowsOf(found) {
         subs.push({ url: sub.src, language: lang, name: String(sub.label || lang.toUpperCase()) + " [DiziBal]" });
       }
       return [{
-        name: "CastSinema • DiziBal",
+        name: "🇹🇷 CastSinema • DiziBal",
         title: "DiziBal • " + quality + " • HLS",
         url: found.cfg.stream,
         quality: quality,

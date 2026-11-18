@@ -159,9 +159,9 @@ ekleyin veya dosyayı silin.
 
 Provider dosyasındaki `provider: "..."` değerini manifest `id`'siyle aynı yapın.
 
-### `npm test` → "emits stream name ... which does not start with "CastSinema • ""
+### `npm test` → "emits stream name ... which must include "CastSinema" and the Turkish flag 🇹🇷."
 
-Stream `name` alanını `CastSinema • <Kaynak>` biçiminde yazın.
+Stream `name` alanını `🇹🇷 CastSinema • <Kaynak>` biçiminde yazın.
 
 ### Provider hiç stream döndürmüyor
 
