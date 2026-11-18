@@ -727,7 +727,7 @@ function loadFilemoon(embedPage) {
                     if (!source.url) continue;
                     var quality = qualityLabel(source.label, parseInt(source.height, 10) || 0);
                     rows.push({
-                      name: "🇹🇷 CastSinema • SezonlukDizi",
+                      name: "CastSinema • SezonlukDizi",
                       provider: "castsinema-sezonlukdizi",
                       title: "SezonlukDizi • Filemoon " + quality,
                       url: source.url,
@@ -756,7 +756,7 @@ function loadPlainEmbed(embedPage) {
       if (!hls) return [];
       return [
         {
-          name: "🇹🇷 CastSinema • SezonlukDizi",
+          name: "CastSinema • SezonlukDizi",
           provider: "castsinema-sezonlukdizi",
           title: "SezonlukDizi • HLS",
           url: hls,

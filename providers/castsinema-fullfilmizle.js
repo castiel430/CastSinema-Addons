@@ -166,7 +166,7 @@ function getStreams(tmdbId, mediaType, season, episode) {
             return resolveEmbed(embedUrl).then(function (rows) {
               for (var i = 0; i < rows.length && out.length < 3; i++) {
                 out.push({
-                  name: "🇹🇷 CastSinema • FullFilmIzle",
+                  name: "CastSinema • FullFilmIzle",
                   title: "FullFilmIzle • " + title + " • TR Dublaj - HD",
                   url: rows[i].url,
                   quality: 1080,

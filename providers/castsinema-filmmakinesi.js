@@ -226,7 +226,7 @@ function buildStreamUrls(info, embedUrl, title) {
   var headers = { "User-Agent": UA_CLIENT, "Referer": embedUrl, "Origin": originOf(embedUrl) };
   if (master) {
     streams.push({
-      name: "🇹🇷 CastSinema • FilmMakinesi",
+      name: "CastSinema • FilmMakinesi",
       title: "FilmMakinesi • " + (title || "Film") + " • HLS",
       url: master,
       quality: 1080,
@@ -243,7 +243,7 @@ function buildStreamUrls(info, embedUrl, title) {
     if (!file) continue;
     if (file === master) continue;
     streams.push({
-      name: "🇹🇷 CastSinema • FilmMakinesi",
+      name: "CastSinema • FilmMakinesi",
       title: "FilmMakinesi • " + (title || "Film") + " • Kaynak " + (i + 1),
       url: String(file),
       quality: 1080,

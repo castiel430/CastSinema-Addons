@@ -197,7 +197,7 @@ function getStreams(tmdbId, mediaType, season, episode) {
       var qMatch = /(\d{3,4}p)/i.exec(item.label || "") || /-(1080|720|480|360)\.mp4/i.exec(item.url || "");
       var q = qMatch ? (qMatch[1].toLowerCase().indexOf("p") > -1 ? qMatch[1].toLowerCase() : qMatch[1] + "p") : "auto";
       return {
-        name: "🇹🇷 CastSinema • DiziPod",
+        name: "CastSinema • DiziPod",
         title: "DiziPod • " + (item.label || "Kaynak " + (index + 1)) + " • HLS",
         url: item.url,
         quality: q,

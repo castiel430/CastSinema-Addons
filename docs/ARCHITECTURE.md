@@ -83,7 +83,7 @@ Değerler `globalThis.SCRAPER_SETTINGS` içinde `key` ile saklanır.
 
 ```js
 {
-  name:      "🇹🇷 CastSinema • FilmModu",          // manifest `name` ile aynı olmalı
+  name:      "CastSinema • FilmModu",          // manifest `name` ile aynı olmalı
   title:     "FilmModu • Fight Club • HLS 1080p",
   url:       "https://cdn.example/x.m3u8", // mutlak URL
   quality:   1080,                        // 1080 | 2160 | 'Auto'
@@ -116,7 +116,7 @@ CastSinema'nun `scrapers[]` dizisini kullanır:
   "scrapers": [
     {
       "id": "castsinema-dizibox",           // benzersiz; picker kimliği
-      "name": "🇹🇷 CastSinema • DiziBox",       // picker etiketi + stream `name` öneki
+      "name": "CastSinema • DiziBox",       // picker etiketi + stream `name` öneki
       "description": "DiziBox yerel HTML/JS dizi sağlayıcısı.",
       "version": "1.0.0",
       "author": "CastSinema",
@@ -223,7 +223,7 @@ Türkçe-duyarlı normalizasyon zorunludur (`ı/ş/ğ/ü/ö/ç`).
 5. **Yetim provider yok** — `providers/` altındaki her `.js` manifest'te
    listelenmiş olmalı
 6. **Marka tutarlılığı** — her provider'ın içindeki `provider:` id'si manifest
-   `id`'siyle eşleşmeli; stream `name`'i `🇹🇷 CastSinema • ` biçiminde başlamalı
+   `id`'siyle eşleşmeli; stream `name`'i `CastSinema • ` biçiminde başlamalı
 
 ### 8.2 Testler — 23 test
 
@@ -296,6 +296,6 @@ var HOST = "https://filmmodu.news";
 - `async/await` **kullanmayın** — Promise zinciri kullanın
 - `getStreams` her zaman `Promise<Stream[]>` dönmeli, hata halinde `[]`
 - `provider` alanı manifest `id`'siyle **birebir** aynı olmalı
-- `name` alanı `🇹🇷 CastSinema • ` biçiminde başlamalı
+- `name` alanı `CastSinema • ` biçiminde başlamalı
 - `headers` içinde doğru `Referer` olmalı (medya host'u)
 - `format` alanı `"m3u8"` veya `"mp4"` olmalı (asla `"video"` değil)

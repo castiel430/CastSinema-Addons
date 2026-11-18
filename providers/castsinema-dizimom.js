@@ -122,7 +122,7 @@ function getStreams(tmdbId, mediaType, season, episode) {
           if (!playerConfig || !playerConfig.stream) return [];
 
           return [{
-            name: "🇹🇷 CastSinema • DiziMom",
+            name: "CastSinema • DiziMom",
             title: "DiziMom • " + ctx.title + " • S" + sNum + "E" + eNum + " • HLS 1080p",
             url: playerConfig.stream,
             quality: 1080,

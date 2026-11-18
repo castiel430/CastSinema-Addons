@@ -432,7 +432,7 @@ function getStreams(tmdbId, mediaType, season, episode) {
                   if (seen[row.url]) continue;
                   seen[row.url] = 1;
                   out.push({
-                    name: "🇹🇷 CastSinema • Xpass",
+                    name: "CastSinema • Xpass",
                     title: "Xpass • " + row.label,
                     url: row.url,
                     quality: "auto",

@@ -121,7 +121,7 @@ function getStreams(tmdbId, mediaType, season, episode) {
         return resolveOkru(embedUrl).then(function (hit) {
           if (!hit || !hit.url) return [];
           return [{
-            name: "🇹🇷 CastSinema • IzleFilm",
+            name: "CastSinema • IzleFilm",
             title: "IzleFilm • " + title + " • TR Dublaj - HD",
             url: hit.url,
             quality: 1080,

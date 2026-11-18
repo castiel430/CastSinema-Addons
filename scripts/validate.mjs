@@ -117,8 +117,8 @@ for (const entry of scrapers) {
   // The stream display name must use the current brand as prefix.
   const names = [...code.matchAll(/name\s*:\s*['"]([^'"]+)['"]/g)].map(m => m[1]);
   for (const name of names) {
-    if (name.includes('•') && !(name.includes(BRAND) && name.includes('🇹🇷'))) {
-      fail(`${entry.filename} emits stream name "${name}" which must include "${BRAND}" and the Turkish flag 🇹🇷.`);
+    if (name.includes('•') && !name.startsWith(`${BRAND} •`)) {
+      fail(`${entry.filename} emits stream name "${name}" which does not start with "${BRAND} •".`);
     }
   }
 

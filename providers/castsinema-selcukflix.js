@@ -820,7 +820,7 @@ module.exports.getStreams = function (id, mediaType, season, episode) {
 /* CastSinema branding: every row carries the addon provider id, a brand name,
    a concrete stream format (ExoPlayer needs m3u8/mp4, never an embed page),
    proxy headers and a language tag derived from the source label. */
-var __castsinemaTag = { provider: "castsinema-selcukflix", name: "🇹🇷 CastSinema • SelcukFlix" };
+var __castsinemaTag = { provider: "castsinema-selcukflix", name: "CastSinema • SelcukFlix" };
 var __castsinemaRows = module.exports.getStreams;
 module.exports.getStreams = function (id, mediaType, season, episode) {
   return __castsinemaRows.call(this, id, mediaType, season, episode).then(function (streams) {

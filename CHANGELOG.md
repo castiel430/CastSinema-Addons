@@ -5,6 +5,13 @@ All notable changes to CastSinema-Addons will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/tr/).
 
+## [1.9.8] - 2026-11-18
+
+### Removed
+- 1.9.6'da eklenen 🇹🇷 bayrağı stream adlarında 1.9.8 ile kaldırıldı; adlar tekrar
+  `CastSinema • <Kaynak>` biçiminde; `validate.mjs` kuralı da eski öneke döndü.
+- Manifest sürümü `1.9.8`, **36 provider**.
+
 ## [1.9.7] - 2026-11-18
 
 ### Fixed

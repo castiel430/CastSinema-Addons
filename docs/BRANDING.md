@@ -81,10 +81,10 @@ Değiştirmek provider'ı bozar.
 Her provider'da:
 
 ```js
-name: "🇹🇷 CastSinema • FilmModu",
+name: "CastSinema • FilmModu",
 ```
 
-`validate.mjs` bunu zorunlu kılar — `🇹🇷 CastSinema • ` biçiminde olmayan bir
+`validate.mjs` bunu zorunlu kılar — `CastSinema • ` biçiminde olmayan bir
 stream adı hata verir.
 
 ### 3.2 Provider kimlikleri

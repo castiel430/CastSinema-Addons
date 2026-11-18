@@ -397,7 +397,7 @@ function getStreams(tmdbId, mediaType, season, episode) {
                 var out = [];
                 for (var k = 0; k < manifests.length; k++) {
                   out.push({
-                    name: "🇹🇷 CastSinema • FullHDFilmizlesene",
+                    name: "CastSinema • FullHDFilmizlesene",
                     title: "FullHDFilmizlesene • " + (ctx.title || "Film") + " • " + (source.source || "Kaynak") + " • HLS",
                     url: manifests[k],
                     quality: 1080,

@@ -147,7 +147,7 @@ function getStreams(tmdbId, mediaType, season, episode) {
           return resolveOkEmbed(embedUrl).then(function (hit) {
             if (!hit || !hit.url) return [];
             return [{
-              name: "🇹🇷 CastSinema • BirAsyaDizi",
+              name: "CastSinema • BirAsyaDizi",
               title: "BirAsyaDizi • " + title + " • S" + (season || 1) + "E" + (episode || 1) + " • TR Altyazılı - HD",
               url: hit.url,
               quality: 1080,
