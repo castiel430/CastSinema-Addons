@@ -5,6 +5,15 @@ All notable changes to CastSinema-Addons will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/tr/).
 
+## [1.10.1] - 2026-11-19
+
+### Changed
+- **YFilmizle** Limon Film ayna listesine `tvfilmizle.com` ve `pcfilmizle.com`
+  eklendi (aynı veritabanını paylaşır; arama ucu + `hotstream.club`
+  `be-player-config` zinciri iki ayna için de canlı doğrulandı). Provider
+  davranışı değişmedi; arıza durumunda ek yedeklerdir.
+- Manifest sürümü `1.10.1`, **38 provider**.
+
 ## [1.10.0] - 2026-11-19
 
 ### Added
