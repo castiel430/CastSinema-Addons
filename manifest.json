@@ -1,7 +1,7 @@
 {
   "name": "CastSinema",
   "id": "castsinema",
-  "version": "1.9.9",
+  "version": "1.10.0",
   "scrapers": [
     {
       "id": "castsinema-boxfilm",
@@ -857,6 +857,29 @@
       "formats": [
         "m3u8",
         "mp4"
+      ],
+      "limited": false,
+      "disabledPlatforms": [],
+      "supportsExternalPlayer": true
+    },
+    {
+      "id": "castsinema-dizizon",
+      "name": "CastSinema • DiziZON",
+      "description": "DiziZON yabancı dizi arşivi (MolySTREAM HLS, Türkçe).",
+      "version": "1.0.0",
+      "author": "CastSinema",
+      "supportedTypes": [
+        "tv"
+      ],
+      "filename": "providers/castsinema-dizizon.js",
+      "enabled": true,
+      "hasSettings": false,
+      "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",
+      "contentLanguage": [
+        "tr"
+      ],
+      "formats": [
+        "m3u8"
       ],
       "limited": false,
       "disabledPlatforms": [],

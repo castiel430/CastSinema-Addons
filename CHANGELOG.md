@@ -5,6 +5,22 @@ All notable changes to CastSinema-Addons will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/tr/).
 
+## [1.10.0] - 2026-11-19
+
+### Added
+- **DiziZON** (`castsinema-dizizon`): `www.dizizon.com` yabancı dizi arşivi
+  (~2200 başlık, TR altyazılı). Akış: `/request/php/` `type=getDizi` kataloğu →
+  TMDB başlığıyla eşleştirme → `/dizi/<slug>/sezon-<s>/bolum-<e>` bölüm sayfasındaki
+  varsayılan `loadVideo('<vid>')` → `type=loadVideo` ile `/player?v=` → ilk yanıt
+  "Lütfen bekleyiniz" + `PHPSESSID`/`_cff` çerezi; çerezlerle (kısa beklemeyle) tekrar
+  istekte MolySTREAM embed'i → embed sayfasındaki `CryptoJS.AES.decrypt`
+  (OpenSSL `Salted__`, AES-256-CBC, EVP_BytesToKey MD5) saf JS ile çözülür →
+  içerideki `file:` HLS master'ı döndürülür. Referer embed sayfasıdır ve
+  `proxyHeaders` ile taşınır. Canlı uçtan uca doğrulandı (Stranger Things S1E1,
+  `https://dbx.molystream.org/embed/sheila/...` → m3u8). Provider yalnızca `tv`
+  döndürür (katalog yabancı dizi odaklıdır).
+- Manifest sürümü `1.10.0`, **38 provider**.
+
 ## [1.9.9] - 2026-11-19
 
 ### Added

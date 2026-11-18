@@ -59,6 +59,7 @@ async function proxyFetch(input, init = {}) {
     statusText: payload.error || '',
     url,
     headers: new Map(Object.entries(payload.headers || {})),
+    setCookies: Array.isArray(payload.setCookies) ? payload.setCookies : [],
     text: async () => text,
     json: async () => { try { return JSON.parse(text); } catch (_) { return null; } },
     arrayBuffer: async () => Buffer.from(text, 'utf8').buffer,

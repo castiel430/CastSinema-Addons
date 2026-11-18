@@ -74,12 +74,13 @@ yayınlayamazsınız.
 | **FullFilmIzle** | `fullfilmizle.fit` | film | ✅ çalışıyor (videopark + videoseyred HLS) |
 | **IzleFilm** | `izlefilm.net` | film | ✅ çalışıyor (ok.ru → HLS) |
 | **YFilmizle** | `tikfilmizle.com` (Limon ailesi) | film | ✅ çalışıyor (HLS, TR Dublaj + Altyazılı) |
+| **DiziZON** | `www.dizizon.com` | dizi | ✅ çalışıyor (MolySTREAM → HLS, TR) |
 | **DiziPal** | `dizipal1596.com` | film + dizi | ⚠️ Cloudflare (CI ağını 403'lüyor) |
 | **SelcukFlix** | `selcukflix.app` | film + dizi | ⚠️ Cloudflare (CI ağını 403'lüyor) |
 | **Dizilla** | `dizilla.la` | dizi | ⚠️ Cloudflare (CI ağını 403'lüyor) |
 | **Webteizle** | `webteizle.info` | film | ⚠️ Cloudflare (CI ağını 403'lüyor) |
 
-37 provider. Durumlar `tools/domain_watch.py` tarafından canlı olarak
+38 provider. Durumlar `tools/domain_watch.py` tarafından canlı olarak
 doğrulanır (aşağıya bakın). Cloudflare uyarısı alan provider'lar, çalışan kod
 yoluna sahiptir ancak bu deponun test çıkış IP'si site WAF'ı tarafından
 engellenir; ev/telefon ağından normal şekilde çalışırlar.
@@ -109,6 +110,7 @@ engellenir; ev/telefon ağından normal şekilde çalışırlar.
 | **BirAsyaDizi** | Bölüm sayfasındaki odnoklassniki embed'inin `data-options` JSON'u aynı şekilde `metadata.ondemandHls` taşır; ok.ru yerine `vkuser.net` master döner. |
 | **FullFilmIzle** | Film sayfası iframe'i `videopark.top/oplayer` (sayfadaki `VIDEO_DATA` JSON'u HLS/MP4 kaynakları verir) veya `videoseyred.in/embed` → `/playlist/<num>.json` → HLS + Türkçe altyazı. |
 | **YFilmizle** | WP `wp-json` ile arama yapar (yabancı katalog, film-odaklı). Her film sayfasında `<!--baslik: ...-->` yorumuyla işaretlenen `hotstream.club` embed’i vardır; `post-page-numbers` bağlantıları `Türkçe Dublaj` ↔ `Türkçe Altyazılı` varyantlarını verir ve ikisi de çözülür. Oynatıcı `be-player-config` (AES-256-CBC; anahtar = videoId, CryptoJS `evpKdf`) açılır ve HLS adresi alınır. Limon ailesi aynaları (`tikfilmizle`, `okfilmizle`, `infilmizle`, `ultraiz`, `nadirfilm`) aynı veritabanını paylaşır; provider ayna sırasını dener. |
+| **DiziZON** | `/request/php/` ucuna `type=getDizi` POST’lanarak ~2200 başlık kataloğu çekilir ve TMDB başlığıyla eşleştirilir (TR karakter duyarlı). Bölüm sayfasındaki varsayılan `loadVideo('<vid>')` token’ı `type=loadVideo` ile çözümlenir; `/player?v=` ilk istekte "Lütfen bekleyiniz" + `PHPSESSID`/`_cff` çerezi döner, çerezlerle (ve kısa beklemeyle) tekrar istenince MolySTREAM embed’i gelir. Embed sayfasındaki `CryptoJS.AES.decrypt(ct, pass)` (OpenSSL `Salted__`, AES-256-CBC, EVP_BytesToKey MD5) saf JS ile çözülür; içerideki `file:` adresi HLS master’dır. Referer embed sayfası olarak eklenir. |
 
 ---
 
@@ -196,8 +198,8 @@ her 6 saatte bir otomatik çalışacak şekilde tanımlıdır:
 
 ```text
 CastSinema/
-├── manifest.json           # 37 scraper tanımı
-├── providers/              # 37 provider JS dosyası
+├── manifest.json           # 38 scraper tanımı
+├── providers/              # 38 provider JS dosyası
 ├── assets/logo.png         # picker logosu
 ├── scripts/
 │   ├── validate.mjs        # manifest + provider doğrulaması

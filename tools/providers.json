@@ -480,5 +480,19 @@
       "tmdbId": "1108427",
       "type": "movie"
     }
+  },
+  "castsinema-dizizon": {
+    "file": "providers/castsinema-dizizon.js",
+    "hostVar": "HOST",
+    "hostStyle": "single",
+    "base": "dizizon",
+    "www": true,
+    "marker": "dizizon",
+    "test": {
+      "tmdbId": "66732",
+      "type": "tv",
+      "season": 1,
+      "episode": 1
+    }
   }
 }

@@ -146,10 +146,15 @@ class _Handler(BaseHTTPRequestHandler):
             "length": len(response.content or b""),
             "final": str(response.url),
         })
+        try:
+            cookies = response.headers.get_list("set-cookie") or []
+        except Exception:
+            cookies = []
         return {
             "status": response.status_code,
             "headers": dict(response.headers),
             "body": base64.b64encode(response.content or b"").decode("ascii"),
+            "setCookies": cookies,
         }
 
 
