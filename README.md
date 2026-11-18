@@ -73,7 +73,7 @@ yayınlayamazsınız.
 | **BirAsyaDizi** | `birasyadizi.cx` | dizi (Asya) | ✅ çalışıyor (odnoklassniki → HLS) |
 | **FullFilmIzle** | `fullfilmizle.fit` | film | ✅ çalışıyor (videopark + videoseyred HLS) |
 | **IzleFilm** | `izlefilm.net` | film | ✅ çalışıyor (ok.ru → HLS) |
-| **DiziPal** | `dizipal1595.com` | film + dizi | ⚠️ Cloudflare (CI ağını 403'lüyor) |
+| **DiziPal** | `dizipal1596.com` | film + dizi | ⚠️ Cloudflare (CI ağını 403'lüyor) |
 | **SelcukFlix** | `selcukflix.app` | film + dizi | ⚠️ Cloudflare (CI ağını 403'lüyor) |
 | **Dizilla** | `dizilla.la` | dizi | ⚠️ Cloudflare (CI ağını 403'lüyor) |
 | **Webteizle** | `webteizle.info` | film | ⚠️ Cloudflare (CI ağını 403'lüyor) |
@@ -305,6 +305,6 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the provider contract,
 | **BirAsyaDizi** | `birasyadizi.cx` | series (Asian drama) |
 | **FullFilmIzle** | `fullfilmizle.fit` | movie (videopark + videoseyred HLS) |
 | **IzleFilm** | `izlefilm.net` | movie (ok.ru → HLS) |
-| **DiziPal** | `dizipal1595.com` | movie + series (Cloudflare WAF) |
+| **DiziPal** | `dizipal1596.com` | movie + series (Cloudflare WAF) |
 | **SelcukFlix** | `selcukflix.app` | movie + series (Cloudflare WAF) |
 | **Dizilla** | `dizilla.la` | series (Cloudflare WAF) |

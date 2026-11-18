@@ -12,12 +12,12 @@
  *       -> dplayer82 player -> NP_CONFIG master (or legacy openPlayer) -> HLS variants.
  * The player CDN's Cloudflare rule 403s Chrome-style UAs (regardless of TLS) and undici's TLS
  * fingerprint, so requests carry a Firefox UA; that passes both the CDN and the Wikidata lookup.
- * The site moved from dizipal1592.com to dizipal1595.com; 1592 301s, and a redirected POST
+ * The site moved from dizipal1595.com to dizipal1596.com; 1595 301s, and a redirected POST
  * turns into a GET, which /api/mj rejects with 405.
  */
 
 var UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0";
-var BASE = "https://dizipal1595.com";
+var BASE = "https://dizipal1596.com";
 var B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 var K512HEX =
   "428a2f98d728ae22 7137449123ef65cd b5c0fbcfec4d3b2f e9b5dba58189dbbc 3956c25bf348b538 59f111f1b605d019 923f82a4af194f9b ab1c5ed5da6d8118 " +

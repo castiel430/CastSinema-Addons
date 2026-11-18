@@ -5,6 +5,17 @@ All notable changes to CastSinema-Addons will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/tr/).
 
+## [1.9.5] - 2026-11-18
+
+### Fixed
+- **DiziPal** domaini `dizipal1595.com` → `dizipal1596.com`. Eski domain 301 ile
+  yönlendiriyor; yönlenen POST `/api/mj` tarafından 405 ile reddedildiği için
+  provider akış üretemiyordu. Yeni domainde site akışı çalışıyor; kalan 403
+  oynatıcı CDN'inin (dplayer82) bilinen Cloudflare kısıtıdır.
+
+### Changed
+- Manifest sürümü `1.9.5`, **36 provider**.
+
 ## [1.9.4] - 2026-11-14
 
 ### Changed

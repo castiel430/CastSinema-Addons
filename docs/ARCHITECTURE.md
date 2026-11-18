@@ -247,7 +247,7 @@ YesilCam TV (query-string HLS), FullFilmIzle (videopark/videoseyred HLS).
 
 ### 9.1 Cloudflare istemci engeli
 
-`webteizle.info`, `dizipal1595.com`, `selcukflix.app` (ve `dizilla.la` intermittently)
+`webteizle.info`, `dizipal1596.com`, `selcukflix.app` (ve `dizilla.la` intermittently)
 Node/undici TLS parmak izini engelliyor (403). Tarayıcı, Android ve native istemciler
 geçiyor. Provider'lar istemcide çalıştığı için bu bir sorun değildir, ancak
 **sunucu tarafında test edilemez** — doğrulama tarayıcı üzerinden yapılmalıdır.
