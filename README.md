@@ -42,8 +42,8 @@ yayınlayamazsınız.
 | Provider | Kaynak site | Tip | Durum |
 |---|---|---|---|
 | **DiziBox** | `www.dizibox.live` | dizi | ✅ çalışıyor |
-| **ClipBox** | `vixsrc.to` | film + dizi | ✅ çalışıyor |
-| **Xpass** | `play.xpass.top` | film + dizi | ✅ çalışıyor |
+| **ClipBox** | `vixsrc.to` | film + dizi | ⏸️ deaktif (1.10.2) |
+| **Xpass** | `play.xpass.top` | film + dizi | ⏸️ deaktif (1.10.2) |
 | **FilmModu** | `filmmodu.news` | film | ✅ çalışıyor |
 | **DiziMom** | `ddizimom.net` | dizi | ✅ çalışıyor |
 | **SetFilmIzle** | `www.setfilmizle.ltd` | film + dizi | ✅ çalışıyor |
@@ -80,7 +80,7 @@ yayınlayamazsınız.
 | **Dizilla** | `dizilla.la` | dizi | ⚠️ Cloudflare (CI ağını 403'lüyor) |
 | **Webteizle** | `webteizle.info` | film | ⚠️ Cloudflare (CI ağını 403'lüyor) |
 
-38 provider. Durumlar `tools/domain_watch.py` tarafından canlı olarak
+38 provider (36 aktif — ClipBox ve Xpass 1.10.2'de devre dışı). Durumlar `tools/domain_watch.py` tarafından canlı olarak
 doğrulanır (aşağıya bakın). Cloudflare uyarısı alan provider'lar, çalışan kod
 yoluna sahiptir ancak bu deponun test çıkış IP'si site WAF'ı tarafından
 engellenir; ev/telefon ağından normal şekilde çalışırlar.
@@ -277,8 +277,8 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the provider contract,
 | Provider | Source site | Type |
 |---|---|---|
 | **DiziBox** | `www.dizibox.live` | series |
-| **ClipBox** | `vixsrc.to` | movie + series |
-| **Xpass** | `play.xpass.top` | movie + series |
+| **ClipBox** | `vixsrc.to` | movie + series | *(deactivated 1.10.2)* |
+| **Xpass** | `play.xpass.top` | movie + series | *(deactivated 1.10.2)* |
 | **FilmModu** | `filmmodu.news` | movie |
 | **DiziMom** | `ddizimom.net` | series |
 | **SetFilmIzle** | `www.setfilmizle.ltd` | movie + series |

@@ -5,6 +5,15 @@ All notable changes to CastSinema-Addons will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/tr/).
 
+## [1.10.2] - 2026-11-19
+
+### Changed
+- **ClipBox** (`castsinema-clipbox`) ve **Xpass** (`castsinema-xpass`)
+  sağlayıcıları **devre dışı** (`enabled: false`). Dosyaları ve kodları silinmedi;
+  manifest girdileri duruyor, yalnızca addon tarafından çağrılmaları engellenir
+  (kullanıcı isteği). Doğrulama sayımı: 38 provider dosyası, **36 aktif**.
+- Manifest sürümü `1.10.2`.
+
 ## [1.10.1] - 2026-11-19
 
 ### Changed

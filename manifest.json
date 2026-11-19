@@ -1,7 +1,7 @@
 {
   "name": "CastSinema",
   "id": "castsinema",
-  "version": "1.10.1",
+  "version": "1.10.2",
   "scrapers": [
     {
       "id": "castsinema-boxfilm",
@@ -61,7 +61,7 @@
         "tv"
       ],
       "filename": "providers/castsinema-clipbox.js",
-      "enabled": true,
+      "enabled": false,
       "hasSettings": false,
       "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",
       "contentLanguage": [
@@ -86,7 +86,7 @@
         "tv"
       ],
       "filename": "providers/castsinema-xpass.js",
-      "enabled": true,
+      "enabled": false,
       "hasSettings": false,
       "logo": "https://raw.githubusercontent.com/castiel430/CastSinema-Addons/main/assets/logo.png",
       "contentLanguage": [
