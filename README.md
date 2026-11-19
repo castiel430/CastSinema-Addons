@@ -183,13 +183,14 @@ Bot her provider için:
 4. **Rapor yazar** (`reports/domain-watch-<tarih>.md`) — hangi isteklerin
    başarısız olduğuna kadar.
 
-Bulduğu domaini `--fix` ile provider dosyasına yazar. GitHub Actions'ta
-her 6 saatte bir otomatik çalışacak şekilde tanımlıdır:
+Bulduğu domaini `--fix` ile provider dosyasına yazar ve **yeni host'a karşı testi
+tekrar çalıştırıp doğrular**. GitHub Actions'ta her 6 saatte bir otomatik
+çalışır; zamanlanmış koşular artık `--fix` ile çalışıp değişikliği commit eder,
+raporu da artefakt olarak yükler:
 
 ```yaml
 # .github/workflows/domain-watch.yml
-- run: python tools/domain_watch.py
-- run: python tools/domain_watch.py --fix
+- run: python tools/domain_watch.py --strict --fix   # schedule + dispatch
 ```
 
 ---

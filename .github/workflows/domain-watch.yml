@@ -43,10 +43,18 @@ jobs:
           pip install -r tools/requirements.txt
 
       - name: Scan domains and test providers
-        run: python tools/domain_watch.py --strict ${{ inputs.fix && '--fix' || '' }}
+        run: python tools/domain_watch.py --strict ${{ (github.event_name == 'schedule' || inputs.fix) && '--fix' || '' }}
+
+      - name: Upload scan report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: domain-watch-report
+          path: reports/
+          if-no-files-found: ignore
 
       - name: Commit host updates
-        if: ${{ inputs.fix }}
+        if: ${{ github.event_name == 'schedule' || inputs.fix }}
         run: |
           if [ -z "$(git status --porcelain)" ]; then
             echo "No domain changes"

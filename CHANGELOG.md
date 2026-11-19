@@ -5,6 +5,23 @@ All notable changes to CastSinema-Addons will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/tr/).
 
+## [1.10.3] - 2026-11-19
+
+### Fixed
+- **Domain bekçisi** (`tools/domain_watch.py`) beklenen otomatik güncellemeyi
+  yapmıyordu: `.github/workflows/domain-watch.yml` zamanlanmış koşularda
+  `--fix` geçmediği için yalnızca tarayıp "FIXED" diye hata veriyor, hiçbir
+  domaini yazmıyordu. Zamanlanmış koşular artık `--fix` ile çalışıp bulunan
+  host'u provider dosyasına yazıyor ve commit ediyor.
+- `--report <yol>` bayrağı dosyayı hiç yazmıyordu (sadece yolu yazdırıyordu);
+  artık raporu verilen yola yazıyor.
+- `--fix` sonrası provider, **yeni host'a karşı yeniden test edilip**
+  doğrulanıyor; önceki davranışta aynı koşu ölü host testinin sonucunu
+  raporluyordu.
+- Domain-watch raporu CI'da artefakt olarak yükleniyor (`reports/`), böylece
+  zamanlanmış taramaların sonucu görülebiliyor.
+- Manifest sürümü `1.10.3`.
+
 ## [1.10.2] - 2026-11-19
 
 ### Changed

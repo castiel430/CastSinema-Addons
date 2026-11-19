@@ -340,8 +340,22 @@ def check_provider(key: str, config: dict, proxy_port: int, fix: bool) -> Provid
     if working and current and working[0] != current[0]:
         if fix and write_hosts(provider_file, config["hostVar"], config["hostStyle"], working):
             result.changed = True
-            result.status = "fixed"
             result.note = f"{current[0]} -> {working[0]}"
+            # Re-run the provider so the report reflects the rewritten host,
+            # not the dead one it was tested against above.
+            reset_proxy_log(proxy_port)
+            retest = run_provider_test(provider_file, proxy_port, case)
+            requests = proxy_requests(proxy_port)
+            result.streams = int(retest.get("count") or 0)
+            result.stream_urls = [s.get("url", "") for s in (retest.get("streams") or [])][:3]
+            if result.streams > 0:
+                result.status = "fixed"
+                result.note += "; verified"
+            else:
+                result.status = "broken"
+                summary = summarise_requests(requests)
+                result.note += "; retest failed :: " + summary
+                result.requests = requests
         else:
             result.status = "fixed" if not fix else result.status
             result.note = f"suggest {working[0]} (run with --fix)"
@@ -354,10 +368,12 @@ def check_provider(key: str, config: dict, proxy_port: int, fix: bool) -> Provid
 # report + git
 # ---------------------------------------------------------------------------
 
-def write_report(results: list[ProviderResult], changed: list[ProviderResult]) -> Path:
+def write_report(results: list[ProviderResult], changed: list[ProviderResult], path: Path | None = None) -> Path:
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
-    stamp = time.strftime("%Y-%m-%d")
-    path = REPORT_DIR / f"domain-watch-{stamp}.md"
+    if path is None:
+        stamp = time.strftime("%Y-%m-%d")
+        path = REPORT_DIR / f"domain-watch-{stamp}.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
 
     working = [r for r in results if r.status == "ok"]
     broken = [r for r in results if r.status == "broken"]
@@ -459,7 +475,7 @@ def main() -> int:
             print(f"  {flag:<6} {key:<28} {result.streams} stream(s)  {result.note[:60]}")
 
     changed = [r for r in results if r.changed]
-    report_path = Path(args.report) if args.report else write_report(results, changed)
+    report_path = write_report(results, changed, Path(args.report) if args.report else None)
     print(f"\nreport: {report_path}")
 
     if args.commit and changed:
