@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/tr/).
   sağlayıcıları **devre dışı** (`enabled: false`). Dosyaları ve kodları silinmedi;
   manifest girdileri duruyor, yalnızca addon tarafından çağrılmaları engellenir
   (kullanıcı isteği). Doğrulama sayımı: 38 provider dosyası, **36 aktif**.
+- **Vidup** ve **Hexa** sağlayıcıları bu depoda zaten yok: 1.3.0'da
+  (commit `8526786`) çalışmayan uç noktaları nedeniyle manifest'ten ve
+  `providers/` dizininden kaldırıldılar; deaktif edilecek kayıt bulunmuyor.
 - Manifest sürümü `1.10.2`.
 
 ## [1.10.1] - 2026-11-19

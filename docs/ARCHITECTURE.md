@@ -230,8 +230,8 @@ Türkçe-duyarlı normalizasyon zorunludur (`ı/ş/ğ/ü/ö/ç`).
 `tests/providers.test.mjs` içindeki 23 test, provider'ları **`node:vm`** içinde
 **mock `fetch`** ile çalıştırır — gerçek internete hiç çıkmaz.
 
-Kapsam: manifest şeması, ClipBox (film + TV), Vidup (decrypt + TV), Hexa
-(cap-token), FilmModu (Vidmixi HLS), DiziMom, SetFilmIzle (admin-ajax), DiziBox
+Kapsam: manifest şeması, ClipBox (film + TV), FilmModu (Vidmixi HLS), DiziMom,
+SetFilmIzle (admin-ajax), DiziBox
 (dizin + bölüm), HDFilmCehennemi (embed), BoxFilm (rotated player + altyazı),
 FullHDFilmizlesene (rotated source list), DiziFilmizle (Vidmixi + altyazı),
 Dizilla (pichive master + altyazı), Xpass (AES-256-GCM decrypt success/failure),
