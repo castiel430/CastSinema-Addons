@@ -1,6 +1,6 @@
 {
   "name": "castsinema-addons",
-  "version": "1.0.0",
+  "version": "1.10.3",
   "description": "CastSinema - Turkish content scrapers",
   "main": "manifest.json",
   "scripts": {

@@ -80,7 +80,8 @@ yayınlayamazsınız.
 | **Dizilla** | `dizilla.la` | dizi | ⚠️ Cloudflare (CI ağını 403'lüyor) |
 | **Webteizle** | `webteizle.info` | film | ⚠️ Cloudflare (CI ağını 403'lüyor) |
 
-38 provider (36 aktif — ClipBox ve Xpass 1.10.2'de devre dışı). Durumlar `tools/domain_watch.py` tarafından canlı olarak
+38 provider (36 aktif — ClipBox ve Xpass 1.10.2'de devre dışı). Güncel sürüm **1.10.3**
+(domain bekçisi düzeltmeleri; ayrıntılar `CHANGELOG.md`'de). Durumlar `tools/domain_watch.py` tarafından canlı olarak
 doğrulanır (aşağıya bakın). Cloudflare uyarısı alan provider'lar, çalışan kod
 yoluna sahiptir ancak bu deponun test çıkış IP'si site WAF'ı tarafından
 engellenir; ev/telefon ağından normal şekilde çalışırlar.
